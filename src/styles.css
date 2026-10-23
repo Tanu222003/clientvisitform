@@ -5888,6 +5888,47 @@ tbody tr:hover td.sticky-cell {
   display: inline-block;
   white-space: nowrap;
 }
+.client-prop-mini-chip.veena-developer-pvt-ltd,
+.client-prop-mini-chip.vdpl {
+  background: rgba(5, 150, 105, 0.12);
+  color: #047857;
+  border-color: rgba(5, 150, 105, 0.3);
+}
+.client-prop-mini-chip.luxury-empire {
+  background: rgba(217, 119, 6, 0.12);
+  color: #b45309;
+  border-color: rgba(217, 119, 6, 0.3);
+}
+
+.client-prop-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  background: rgba(223, 183, 108, 0.15);
+  color: #9e7526;
+  border: 1px solid rgba(223, 183, 108, 0.35);
+}
+.client-prop-pill.park-solitaire {
+  background: rgba(194, 145, 53, 0.15);
+  color: #b07d1e;
+  border-color: rgba(194, 145, 53, 0.35);
+}
+.client-prop-pill.veena-developer-pvt-ltd,
+.client-prop-pill.vdpl {
+  background: rgba(5, 150, 105, 0.14);
+  color: #047857;
+  border-color: rgba(5, 150, 105, 0.35);
+}
+.client-prop-pill.luxury-empire {
+  background: rgba(217, 119, 6, 0.14);
+  color: #b45309;
+  border-color: rgba(217, 119, 6, 0.35);
+}
 
 @media (max-width: 768px) {
   .login-prop-grid {

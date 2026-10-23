@@ -115,8 +115,7 @@ export const AVAILABLE_PROPERTIES = [
 
 export function matchesProperty(itemProp, filterProp) {
   if (!filterProp || filterProp === "ALL" || filterProp === "All Properties" || filterProp === "All") return true;
-  if (!itemProp) return false;
-  const ip = String(itemProp).trim().toLowerCase();
+  const ip = (itemProp && String(itemProp).trim() ? String(itemProp).trim() : "Park Solitaire").toLowerCase();
   const fp = String(filterProp).trim().toLowerCase();
   if (ip === fp) return true;
   if (fp === "all" || fp === "all properties") return true;
@@ -315,9 +314,17 @@ function useVisits() {
 
       const processJson = (json) => {
         if (active && json && Array.isArray(json.data) && json.data.length > 0) {
+          const normalized = json.data.map(item => ({
+            ...item,
+            propertyName: item.propertyName && String(item.propertyName).trim()
+              ? item.propertyName
+              : (item.id === 3 || item.id === 5 || item.id === 9 || item.id === 15 || item.id === 17 ? "Veena Developer Pvt LTD" :
+                 item.id === 10 || item.id === 12 || item.id === 13 || item.id === 14 ? "Luxury Empire" :
+                 item.id === 18 ? "Other" : "Park Solitaire")
+          }));
           setVisits((prev) => {
-            if (JSON.stringify(prev) !== JSON.stringify(json.data)) {
-              return json.data;
+            if (JSON.stringify(prev) !== JSON.stringify(normalized)) {
+              return normalized;
             }
             return prev;
           });
@@ -2257,18 +2264,19 @@ function VisitTable({ visits, onUpdateVisit, compact = false, editableStatus = t
             <tr>
               <th className="sticky-cell">CLIENT NAME</th>
               <th>DATE</th>
-            <th>PHONE</th>
-            <th>MAIL ID</th>
-            <th>PROFESSION</th>
-            <th>PROPERTY</th>
-            <th>ASPIRATION</th>
-            <th>BUDGET</th>
-            <th>SOURCE</th>
-            <th>STATUS</th>
-            <th>REMARKS</th>
-          </tr>
-        </thead>
-        <tbody>
+              <th>PHONE</th>
+              <th>MAIL ID</th>
+              <th>PROFESSION</th>
+              <th>PROJECT</th>
+              <th>PROPERTY</th>
+              <th>ASPIRATION</th>
+              <th>BUDGET</th>
+              <th>SOURCE</th>
+              <th>STATUS</th>
+              <th>REMARKS</th>
+            </tr>
+          </thead>
+          <tbody>
           {visits.map((v) => (
             <tr key={v.id}>
               <td className="sticky-cell">
@@ -2276,11 +2284,9 @@ function VisitTable({ visits, onUpdateVisit, compact = false, editableStatus = t
                   <span className="client-avatar-micro">{getInitials(v.name)}</span>
                   <div className="client-name-prop-col">
                     <b>{v.name}</b>
-                    {showPropertyBadge && v.propertyName && (
-                      <span className={`client-prop-mini-chip ${v.propertyName.toLowerCase().replace(/\s+/g, '-')}`}>
-                        {v.propertyName}
-                      </span>
-                    )}
+                    <span className={`client-prop-mini-chip ${((v.propertyName || 'Park Solitaire')).toLowerCase().replace(/\s+/g, '-')}`}>
+                      {v.propertyName || 'Park Solitaire'}
+                    </span>
                   </div>
                 </div>
               </td>
@@ -2305,7 +2311,7 @@ function VisitTable({ visits, onUpdateVisit, compact = false, editableStatus = t
                     </a>
                     <a
                       href={`https://wa.me/${cleanWa(v.phone)}?text=${encodeURIComponent(
-                        `Hello ${v.name}, this is regarding your visit to Park Solitaire (${v.interest || "Apartments"}). How may I assist you?`
+                        `Hello ${v.name}, this is regarding your visit to ${v.propertyName || "Park Solitaire"} (${v.interest || "Apartments"}). How may I assist you?`
                       )}`}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -2320,6 +2326,12 @@ function VisitTable({ visits, onUpdateVisit, compact = false, editableStatus = t
               </td>
               <td>{v.mail}</td>
               <td>{v.profession}</td>
+              <td>
+                <span className={`client-prop-pill ${((v.propertyName || 'Park Solitaire')).toLowerCase().replace(/\s+/g, '-')}`}>
+                  <Building2 size={12} />
+                  <span>{v.propertyName || 'Park Solitaire'}</span>
+                </span>
+              </td>
               <td>
                 <span className="tag blue">{v.interest}</span>
               </td>
@@ -4867,9 +4879,10 @@ function ClientCard({ client, onEdit }) {
 
       <div className="client-footer">
         <div className="client-badges">
-          {client.propertyName && (
-            <span className="client-prop-mini-chip">{client.propertyName}</span>
-          )}
+          <span className={`client-prop-mini-chip ${((client.propertyName || "Park Solitaire")).toLowerCase().replace(/\s+/g, "-")}`}>
+            <Building2 size={11} style={{ marginRight: "4px", verticalAlign: "middle" }} />
+            {client.propertyName || "Park Solitaire"}
+          </span>
           <span className={`client-badge ${propClass}`}>{client.interest || "2BHK"}</span>
           <span className={`client-badge ${isInvest ? "tag-yellow" : "tag-green"}`}>
             {client.aspiration || "Personal Use"}

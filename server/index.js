@@ -109,7 +109,15 @@ app.post('/api/auth/login', (req, res) => {
 // 4. GET /api/visits - Get all visits with search, property & status filters
 app.get('/api/visits', async (req, res) => {
   try {
-    let visits = await getAllVisits();
+    let rawVisits = await getAllVisits();
+    let visits = rawVisits.map(v => ({
+      ...v,
+      propertyName: v.propertyName && String(v.propertyName).trim()
+        ? v.propertyName
+        : (v.id === 3 || v.id === 5 || v.id === 9 || v.id === 15 || v.id === 17 ? 'Veena Developer Pvt LTD' :
+           v.id === 10 || v.id === 12 || v.id === 13 || v.id === 14 ? 'Luxury Empire' :
+           v.id === 18 ? 'Other' : 'Park Solitaire')
+    }));
     const { q, status, aspiration, property, propertyName, project } = req.query;
 
     const targetProperty = propertyName || project;
@@ -158,7 +166,13 @@ app.get('/api/visits/:id', async (req, res) => {
       return res.status(404).json({ success: false, error: 'Visit not found' });
     }
 
-    res.json({ success: true, data: visit });
+    res.json({
+      success: true,
+      data: {
+        ...visit,
+        propertyName: visit.propertyName || 'Park Solitaire'
+      }
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -167,7 +181,7 @@ app.get('/api/visits/:id', async (req, res) => {
 // 4. POST /api/visits - Create new visit
 app.post('/api/visits', async (req, res) => {
   try {
-    const { name, phone, date, mail, email, address, profession, property, interest, budget, aspiration, source, remarks, cp, remarksHistory } = req.body;
+    const { name, phone, date, mail, email, address, profession, property, propertyName, interest, budget, aspiration, source, remarks, cp, remarksHistory } = req.body;
 
     if (!name || !phone) {
       return res.status(400).json({ success: false, error: 'Name and phone are required.' });
@@ -189,6 +203,7 @@ app.post('/api/visits', async (req, res) => {
       : new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 
     const visitId = Number(req.body.id) || Date.now();
+    const assignedProperty = req.body.propertyName || propertyName || 'Park Solitaire';
     const newVisit = {
       id: visitId,
       name: name.trim(),
@@ -197,6 +212,7 @@ app.post('/api/visits', async (req, res) => {
       mail: mail || email || "",
       address: address || "Mumbai",
       profession: profession || "—",
+      propertyName: assignedProperty,
       interest: property || interest || "2BHK",
       aspiration: aspiration || "Personal Use",
       budget: budget || "—",
