@@ -49,12 +49,14 @@ app.use((req, res, next) => {
 app.get('/api/health', async (req, res) => {
   try {
     const visits = await getAllVisits();
+    const siteVisits = await getAllSiteVisits();
     const dbInfo = getDbInfo();
     res.json({
       status: 'ok',
       uptime: process.uptime(),
       timestamp: new Date().toISOString(),
       totalVisits: visits.length,
+      totalSiteVisits: siteVisits.length,
       database: dbInfo.type,
       storage: dbInfo.storage
     });

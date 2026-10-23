@@ -264,6 +264,24 @@ function mapRowToVisit(r) {
   };
 }
 
+function mapRowToSiteVisit(r) {
+  return {
+    id: Number(r.id),
+    clientName: r.client_name,
+    phone: r.phone,
+    propertyName: r.property_name || 'Park Solitaire',
+    visitDate: r.visit_date,
+    visitTime: r.visit_time || '',
+    salesperson: r.salesperson || '',
+    status: r.status || 'Scheduled',
+    feedback: r.feedback || '',
+    nextFollowUpDate: r.next_follow_up_date || undefined,
+    notes: r.notes || '',
+    createdAt: r.created_at || undefined,
+    updatedAt: r.updated_at || undefined
+  };
+}
+
 // Initialize Database (Schema & Seeds)
 export async function initDb() {
   if (isPostgres) {
@@ -304,7 +322,31 @@ export async function initDb() {
         ALTER TABLE visits ADD COLUMN IF NOT EXISTS property_name TEXT DEFAULT 'Park Solitaire';
       `);
 
-      // Check if seeded
+      // Create site_visits table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS site_visits (
+          id BIGINT PRIMARY KEY,
+          client_name TEXT NOT NULL,
+          phone TEXT NOT NULL,
+          property_name TEXT DEFAULT 'Park Solitaire',
+          visit_date TEXT NOT NULL,
+          visit_time TEXT DEFAULT '',
+          salesperson TEXT DEFAULT '',
+          status TEXT DEFAULT 'Scheduled',
+          feedback TEXT DEFAULT '',
+          next_follow_up_date TEXT DEFAULT NULL,
+          notes TEXT DEFAULT '',
+          created_at TEXT DEFAULT NULL,
+          updated_at TEXT DEFAULT NULL
+        );
+      `);
+
+      // Ensure property_name column exists for previously existing databases
+      await client.query(`
+        ALTER TABLE site_visits ADD COLUMN IF NOT EXISTS property_name TEXT DEFAULT 'Park Solitaire';
+      `);
+
+      // Check if visits seeded
       const countRes = await client.query('SELECT COUNT(*) AS total FROM visits;');
       const total = Number(countRes.rows[0].total);
 
@@ -331,9 +373,37 @@ export async function initDb() {
             new Date().toISOString(), new Date().toISOString()
           ]);
         }
-        console.log('✅ Railway PostgreSQL seeded successfully!');
+        console.log('✅ Railway PostgreSQL seeded visits successfully!');
       } else {
         console.log(`✅ Railway PostgreSQL connected with ${total} visits.`);
+      }
+
+      // Check if site_visits seeded
+      const siteCountRes = await client.query('SELECT COUNT(*) AS total FROM site_visits;');
+      const siteTotal = Number(siteCountRes.rows[0].total);
+
+      if (siteTotal === 0) {
+        console.log('🌱 Seeding initial 10 site visits into Railway PostgreSQL...');
+        const siteSeeds = generateSeedSiteVisits();
+        for (const s of siteSeeds) {
+          await client.query(`
+            INSERT INTO site_visits (
+              id, client_name, phone, property_name, visit_date, visit_time,
+              salesperson, status, feedback, next_follow_up_date, notes,
+              created_at, updated_at
+            ) VALUES (
+              $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+            );
+          `, [
+            s.id, s.clientName, s.phone, s.propertyName || 'Park Solitaire',
+            s.visitDate, s.visitTime || '', s.salesperson || '', s.status || 'Scheduled',
+            s.feedback || '', s.nextFollowUpDate || null, s.notes || '',
+            new Date().toISOString(), new Date().toISOString()
+          ]);
+        }
+        console.log('✅ Railway PostgreSQL seeded site visits successfully!');
+      } else {
+        console.log(`✅ Railway PostgreSQL connected with ${siteTotal} site visits.`);
       }
     } finally {
       client.release();
@@ -546,81 +616,151 @@ export function getDbInfo() {
 // ==========================================
 
 export async function getAllSiteVisits() {
-  try {
-    const seeds = generateSeedSiteVisits();
-    if (!fs.existsSync(siteVisitsFilePath)) {
-      fs.writeFileSync(siteVisitsFilePath, JSON.stringify(seeds, null, 2), 'utf8');
-      return seeds;
-    }
-    const data = fs.readFileSync(siteVisitsFilePath, 'utf8');
-    const parsed = JSON.parse(data);
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-      return seeds;
-    }
-    return parsed.map(v => {
-      if (v.id >= 1 && v.id <= 10) {
-        const seed = seeds.find(s => s.id === v.id);
-        if (seed) {
-          return {
-            ...v,
-            visitDate: seed.visitDate,
-            nextFollowUpDate: seed.nextFollowUpDate || v.nextFollowUpDate
-          };
-        }
+  if (isPostgres) {
+    const res = await pool.query('SELECT * FROM site_visits ORDER BY id DESC;');
+    return res.rows.map(mapRowToSiteVisit);
+  } else {
+    try {
+      const seeds = generateSeedSiteVisits();
+      if (!fs.existsSync(siteVisitsFilePath)) {
+        fs.writeFileSync(siteVisitsFilePath, JSON.stringify(seeds, null, 2), 'utf8');
+        return seeds;
       }
-      return v;
-    });
-  } catch {
-    return generateSeedSiteVisits();
+      const data = fs.readFileSync(siteVisitsFilePath, 'utf8');
+      const parsed = JSON.parse(data);
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        return seeds;
+      }
+      return parsed.map(v => {
+        if (v.id >= 1 && v.id <= 10) {
+          const seed = seeds.find(s => s.id === v.id);
+          if (seed) {
+            return {
+              ...v,
+              visitDate: seed.visitDate,
+              nextFollowUpDate: seed.nextFollowUpDate || v.nextFollowUpDate
+            };
+          }
+        }
+        return v;
+      });
+    } catch {
+      return generateSeedSiteVisits();
+    }
   }
 }
 
 export async function getSiteVisitById(id) {
-  const list = await getAllSiteVisits();
-  return list.find(v => v.id === Number(id)) || null;
+  if (isPostgres) {
+    const res = await pool.query('SELECT * FROM site_visits WHERE id = $1;', [Number(id)]);
+    return res.rows.length > 0 ? mapRowToSiteVisit(res.rows[0]) : null;
+  } else {
+    const list = await getAllSiteVisits();
+    return list.find(v => v.id === Number(id)) || null;
+  }
 }
 
 export async function createSiteVisit(data) {
-  const list = await getAllSiteVisits();
-  const newVisit = {
-    ...data,
-    id: Number(data.id) || Date.now(),
-    propertyName: data.propertyName || 'Park Solitaire',
-    status: data.status || 'Scheduled',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-  list.unshift(newVisit);
-  const tempFile = `${siteVisitsFilePath}.tmp`;
-  fs.writeFileSync(tempFile, JSON.stringify(list, null, 2), 'utf8');
-  fs.renameSync(tempFile, siteVisitsFilePath);
-  return newVisit;
+  if (isPostgres) {
+    const id = Number(data.id) || Date.now();
+    const res = await pool.query(`
+      INSERT INTO site_visits (
+        id, client_name, phone, property_name, visit_date, visit_time,
+        salesperson, status, feedback, next_follow_up_date, notes,
+        created_at, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      RETURNING *;
+    `, [
+      id,
+      data.clientName,
+      data.phone,
+      data.propertyName || 'Park Solitaire',
+      data.visitDate,
+      data.visitTime || '',
+      data.salesperson || '',
+      data.status || 'Scheduled',
+      data.feedback || '',
+      data.nextFollowUpDate || null,
+      data.notes || '',
+      new Date().toISOString(),
+      new Date().toISOString()
+    ]);
+    return mapRowToSiteVisit(res.rows[0]);
+  } else {
+    const list = await getAllSiteVisits();
+    const newVisit = {
+      ...data,
+      id: Number(data.id) || Date.now(),
+      propertyName: data.propertyName || 'Park Solitaire',
+      status: data.status || 'Scheduled',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    list.unshift(newVisit);
+    const tempFile = `${siteVisitsFilePath}.tmp`;
+    fs.writeFileSync(tempFile, JSON.stringify(list, null, 2), 'utf8');
+    fs.renameSync(tempFile, siteVisitsFilePath);
+    return newVisit;
+  }
 }
 
 export async function updateSiteVisit(id, updates) {
-  const list = await getAllSiteVisits();
-  const index = list.findIndex(v => v.id === Number(id));
-  if (index === -1) return null;
-  const updated = {
-    ...list[index],
-    ...updates,
-    id: Number(id),
-    updatedAt: new Date().toISOString()
-  };
-  list[index] = updated;
-  const tempFile = `${siteVisitsFilePath}.tmp`;
-  fs.writeFileSync(tempFile, JSON.stringify(list, null, 2), 'utf8');
-  fs.renameSync(tempFile, siteVisitsFilePath);
-  return updated;
+  if (isPostgres) {
+    const existing = await getSiteVisitById(id);
+    if (!existing) return null;
+    const merged = { ...existing, ...updates, id: Number(id), updatedAt: new Date().toISOString() };
+    const res = await pool.query(`
+      UPDATE site_visits SET
+        client_name = $1, phone = $2, property_name = $3, visit_date = $4,
+        visit_time = $5, salesperson = $6, status = $7, feedback = $8,
+        next_follow_up_date = $9, notes = $10, updated_at = $11
+      WHERE id = $12
+      RETURNING *;
+    `, [
+      merged.clientName,
+      merged.phone,
+      merged.propertyName || 'Park Solitaire',
+      merged.visitDate,
+      merged.visitTime || '',
+      merged.salesperson || '',
+      merged.status || 'Scheduled',
+      merged.feedback || '',
+      merged.nextFollowUpDate || null,
+      merged.notes || '',
+      merged.updatedAt,
+      Number(id)
+    ]);
+    return mapRowToSiteVisit(res.rows[0]);
+  } else {
+    const list = await getAllSiteVisits();
+    const index = list.findIndex(v => v.id === Number(id));
+    if (index === -1) return null;
+    const updated = {
+      ...list[index],
+      ...updates,
+      id: Number(id),
+      updatedAt: new Date().toISOString()
+    };
+    list[index] = updated;
+    const tempFile = `${siteVisitsFilePath}.tmp`;
+    fs.writeFileSync(tempFile, JSON.stringify(list, null, 2), 'utf8');
+    fs.renameSync(tempFile, siteVisitsFilePath);
+    return updated;
+  }
 }
 
 export async function deleteSiteVisit(id) {
-  const list = await getAllSiteVisits();
-  const filtered = list.filter(v => v.id !== Number(id));
-  if (filtered.length === list.length) return false;
-  const tempFile = `${siteVisitsFilePath}.tmp`;
-  fs.writeFileSync(tempFile, JSON.stringify(filtered, null, 2), 'utf8');
-  fs.renameSync(tempFile, siteVisitsFilePath);
-  return true;
+  if (isPostgres) {
+    const res = await pool.query('DELETE FROM site_visits WHERE id = $1 RETURNING id;', [Number(id)]);
+    return res.rows.length > 0;
+  } else {
+    const list = await getAllSiteVisits();
+    const filtered = list.filter(v => v.id !== Number(id));
+    if (filtered.length === list.length) return false;
+    const tempFile = `${siteVisitsFilePath}.tmp`;
+    fs.writeFileSync(tempFile, JSON.stringify(filtered, null, 2), 'utf8');
+    fs.renameSync(tempFile, siteVisitsFilePath);
+    return true;
+  }
 }
 
