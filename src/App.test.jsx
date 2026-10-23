@@ -826,6 +826,9 @@ describe('Park Solitaire Client Visit App', () => {
       expect(screen.queryByTestId('workflow-section')).not.toBeInTheDocument();
       expect(screen.queryByText(/CRM Operations Workflow Tracker/i)).not.toBeInTheDocument();
 
+      // Verify option of adding new visit is REMOVED from Admin Dashboard
+      expect(screen.queryByRole('link', { name: /New Visit/i })).not.toBeInTheDocument();
+
       // Verify both Park Solitaire and Veena Developer Pvt LTD records exist in unified view
       expect(screen.getByText('Rahul Sharma')).toBeInTheDocument(); // Park Solitaire
       expect(screen.getByText('Amit Verma')).toBeInTheDocument(); // Veena Developer Pvt LTD

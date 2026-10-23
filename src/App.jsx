@@ -993,7 +993,10 @@ function Layout({children}) {
             )}
           </div>
 
-          <NavLink className="top-visit" to="/"><Plus size={15}/> New Visit</NavLink>
+          {/* Only show "+ New Visit" for property desk staff, NOT on Admin Dashboard */}
+          {!isAdmin && (
+            <NavLink className="top-visit" to="/"><Plus size={15}/> New Visit</NavLink>
+          )}
         </header>
         <div className="page-wrap">{children}</div>
       </main>
@@ -1008,9 +1011,11 @@ function Layout({children}) {
           <ClipboardList size={18}/>
           <span>Visits</span>
         </NavLink>
-        <NavLink to="/" className="mob-nav-center" tabIndex={-1} title="New Visit">
-          <Plus size={22}/>
-        </NavLink>
+        {!isAdmin && (
+          <NavLink to="/" className="mob-nav-center" tabIndex={-1} title="New Visit">
+            <Plus size={22}/>
+          </NavLink>
+        )}
         <NavLink to="/clients" className={({isActive})=>"mob-nav-link "+(isActive?"active":"")} tabIndex={-1}>
           <Users size={18}/>
           <span>Clients</span>
