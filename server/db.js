@@ -351,8 +351,17 @@ export async function initDb() {
       const total = Number(countRes.rows[0].total);
 
       if (total === 0) {
-        console.log('🌱 Seeding initial 18 clients across properties into Railway PostgreSQL...');
-        const seeds = generateSeedVisits();
+        let seeds = [];
+        if (fs.existsSync(dataFilePath)) {
+          try {
+            const raw = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
+            if (Array.isArray(raw) && raw.length > 0) seeds = raw;
+          } catch {}
+        }
+        if (seeds.length === 0) {
+          seeds = generateSeedVisits();
+        }
+        console.log(`🌱 Seeding initial ${seeds.length} clients across properties into Railway PostgreSQL...`);
         for (const s of seeds) {
           await client.query(`
             INSERT INTO visits (
@@ -370,7 +379,7 @@ export async function initDb() {
             s.followUpDate || null, s.revisitDate || null, s.cp || '',
             JSON.stringify(s.remarksHistory || []),
             s.propertyName || 'Park Solitaire',
-            new Date().toISOString(), new Date().toISOString()
+            s.createdAt || new Date().toISOString(), s.updatedAt || new Date().toISOString()
           ]);
         }
         console.log('✅ Railway PostgreSQL seeded visits successfully!');
@@ -383,8 +392,17 @@ export async function initDb() {
       const siteTotal = Number(siteCountRes.rows[0].total);
 
       if (siteTotal === 0) {
-        console.log('🌱 Seeding initial 10 site visits into Railway PostgreSQL...');
-        const siteSeeds = generateSeedSiteVisits();
+        let siteSeeds = [];
+        if (fs.existsSync(siteVisitsFilePath)) {
+          try {
+            const raw = JSON.parse(fs.readFileSync(siteVisitsFilePath, 'utf8'));
+            if (Array.isArray(raw) && raw.length > 0) siteSeeds = raw;
+          } catch {}
+        }
+        if (siteSeeds.length === 0) {
+          siteSeeds = generateSeedSiteVisits();
+        }
+        console.log(`🌱 Seeding initial ${siteSeeds.length} site visits into Railway PostgreSQL...`);
         for (const s of siteSeeds) {
           await client.query(`
             INSERT INTO site_visits (
@@ -398,7 +416,7 @@ export async function initDb() {
             s.id, s.clientName, s.phone, s.propertyName || 'Park Solitaire',
             s.visitDate, s.visitTime || '', s.salesperson || '', s.status || 'Scheduled',
             s.feedback || '', s.nextFollowUpDate || null, s.notes || '',
-            new Date().toISOString(), new Date().toISOString()
+            s.createdAt || new Date().toISOString(), s.updatedAt || new Date().toISOString()
           ]);
         }
         console.log('✅ Railway PostgreSQL seeded site visits successfully!');
