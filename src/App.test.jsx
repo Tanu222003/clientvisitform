@@ -799,6 +799,47 @@ describe('Park Solitaire Client Visit App', () => {
       });
     });
 
+    it('separates Visit Form and Dashboard for Luxury Empire desk login and displays new visit immediately on Luxury Empire Dashboard without going to Park Solitaire', async () => {
+      // Simulate logging in as Luxury Empire Property Desk
+      localStorage.setItem("ps_current_user_v3", JSON.stringify({
+        id: "luxury-empire",
+        role: "property",
+        name: "Luxury Empire Sales Desk",
+        email: "desk@luxuryempire.com",
+        property: "Luxury Empire"
+      }));
+
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <App />
+        </MemoryRouter>
+      );
+
+      // Verify dedicated property desk banner on Visit Form
+      expect(screen.getByText(/Luxury Empire — Dedicated Visit Desk/i)).toBeInTheDocument();
+      expect(screen.getByText(/routed to Luxury Empire/i)).toBeInTheDocument();
+
+      // Fill in and submit the visit form for Luxury Empire
+      const nameInput = screen.getByPlaceholderText('Enter first name');
+      const phoneInput = screen.getByPlaceholderText('10-digit number');
+      fireEvent.change(nameInput, { target: { value: 'Rajveer Oberoi' } });
+      fireEvent.change(phoneInput, { target: { value: '9877798777' } });
+
+      const submitBtn = screen.getByRole('button', { name: /submit/i });
+      fireEvent.click(submitBtn);
+
+      // Verify redirect to Luxury Empire Dashboard and visit is listed under Luxury Empire
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { level: 1, name: /Dashboard/i })).toBeInTheDocument();
+        expect(screen.getByText('Luxury Empire Dashboard')).toBeInTheDocument();
+        expect(screen.getByText('Rajveer Oberoi')).toBeInTheDocument();
+        expect(screen.getByText('+91 98777 98777')).toBeInTheDocument();
+      });
+
+      // Verify that Park Solitaire recent visits (like Rahul Sharma) are NOT on Luxury Empire Dashboard
+      expect(screen.queryByText('Rahul Sharma')).not.toBeInTheDocument();
+    });
+
     it('provides Master Admin unified access to all properties in one dashboard without portfolio bar and without property logo', () => {
       // Set Master Admin user
       localStorage.setItem("ps_current_user_v3", JSON.stringify({

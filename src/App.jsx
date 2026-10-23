@@ -277,14 +277,78 @@ const seedVisits = [
   {id:18,name:"Pooja Hegde",date:getRelativeDateStr(14),phone:"+91 91111 22334",mail:"pooja.h@email.com",address:"Santacruz West",profession:"Media",interest:"3BHK",aspiration:"Personal Use",budget:"1.4 Cr",source:"Outdoor Banner",status:"Closed",visitsCount:1,propertyName:"Other",remarks:"Sale deed executed and keys handed over. Very happy with sales team assistance."}
 ];
 
-const seedKey = "park-solitaire-visits-v13";
+const seedKey = "park-solitaire-visits-v14";
 const API_BASE = import.meta.env.VITE_API_URL || (typeof window !== "undefined" && window.location.port === "5173" ? `http://${window.location.hostname || "localhost"}:5001/api` : "/api");
 const RAILWAY_DIRECT_URL = import.meta.env.VITE_RAILWAY_URL || import.meta.env.VITE_BACKEND_URL || "https://park-solitaire-crm-production.up.railway.app/api";
+
+export function getStoredPropMap() {
+  try {
+    const raw = localStorage.getItem("ps_visit_property_cache_v2");
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return {};
+}
+
+export function savePropertyToCache(id, propertyName) {
+  try {
+    if (!id || !propertyName) return;
+    const map = getStoredPropMap();
+    map[String(id)] = propertyName;
+    localStorage.setItem("ps_visit_property_cache_v2", JSON.stringify(map));
+  } catch {}
+}
+
+export function resolvePropertyName(item, existingPrev) {
+  // 1. If explicit non-default propertyName
+  if (item && item.propertyName && String(item.propertyName).trim()) {
+    const raw = String(item.propertyName).trim();
+    if (raw === "Luxury Empire" || raw === "Veena Developer Pvt LTD" || raw === "VDPL" || raw === "Other") {
+      return raw;
+    }
+  }
+
+  // 2. Check if embedded in cp tag: [PROP:Luxury Empire]
+  if (item && item.cp && typeof item.cp === "string" && item.cp.includes("[PROP:")) {
+    const m = item.cp.match(/\[PROP:\s*([^\]]+)\]/);
+    if (m && m[1]) return m[1].trim();
+  }
+
+  // 3. Check if embedded in remarks tag: [PROP:Luxury Empire]
+  if (item && item.remarks && typeof item.remarks === "string" && item.remarks.includes("[PROP:")) {
+    const m = item.remarks.match(/\[PROP:\s*([^\]]+)\]/);
+    if (m && m[1]) return m[1].trim();
+  }
+
+  // 4. Check if existing in previous state (non-default)
+  if (existingPrev && existingPrev.propertyName && existingPrev.propertyName !== "Park Solitaire") {
+    return existingPrev.propertyName;
+  }
+
+  // 5. Check persistent property cache
+  const cache = getStoredPropMap();
+  if (item && item.id && cache[String(item.id)]) {
+    return cache[String(item.id)];
+  }
+
+  // 6. Check existingPrev general
+  if (existingPrev && existingPrev.propertyName) {
+    return existingPrev.propertyName;
+  }
+
+  // 7. Seed visits fallback
+  if (item && typeof item.id === "number") {
+    if (item.id === 3 || item.id === 5 || item.id === 9 || item.id === 15 || item.id === 17) return "Veena Developer Pvt LTD";
+    if (item.id === 10 || item.id === 12 || item.id === 13 || item.id === 14) return "Luxury Empire";
+    if (item.id === 18) return "Other";
+  }
+
+  return item && item.propertyName ? item.propertyName : "Park Solitaire";
+}
 
 function useVisits() {
   const [visits, setVisits] = useState(() => {
     try {
-      const saved = localStorage.getItem(seedKey) || localStorage.getItem("park-solitaire-visits-v12") || localStorage.getItem("park-solitaire-visits-v11") || localStorage.getItem("park-solitaire-visits-v10") || localStorage.getItem("park-solitaire-visits");
+      const saved = localStorage.getItem(seedKey) || localStorage.getItem("park-solitaire-visits-v13") || localStorage.getItem("park-solitaire-visits-v12") || localStorage.getItem("park-solitaire-visits-v11") || localStorage.getItem("park-solitaire-visits-v10") || localStorage.getItem("park-solitaire-visits");
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -303,7 +367,7 @@ function useVisits() {
             if (v.id === 3) return { ...v, source: "Website", revisitDate: v.revisitDate || getRelativeDateStr(0), propertyName: v.propertyName || "Veena Developer Pvt LTD" };
             return {
               ...v,
-              propertyName: v.propertyName || "Park Solitaire"
+              propertyName: resolvePropertyName(v, null)
             };
           });
         }
@@ -329,15 +393,15 @@ function useVisits() {
 
       const processJson = (json) => {
         if (active && json && Array.isArray(json.data) && json.data.length > 0) {
-          const normalized = json.data.map(item => ({
-            ...item,
-            propertyName: item.propertyName && String(item.propertyName).trim()
-              ? item.propertyName
-              : (item.id === 3 || item.id === 5 || item.id === 9 || item.id === 15 || item.id === 17 ? "Veena Developer Pvt LTD" :
-                 item.id === 10 || item.id === 12 || item.id === 13 || item.id === 14 ? "Luxury Empire" :
-                 item.id === 18 ? "Other" : "Park Solitaire")
-          }));
           setVisits((prev) => {
+            const normalized = json.data.map(item => {
+              const existingPrev = prev.find(p => p.id === item.id);
+              const prop = resolvePropertyName(item, existingPrev);
+              return {
+                ...item,
+                propertyName: prop
+              };
+            });
             const localOnly = prev.filter(p => !normalized.some(n => n.id === p.id));
             const merged = [...localOnly, ...normalized];
             if (JSON.stringify(prev) !== JSON.stringify(merged)) {
@@ -4059,13 +4123,22 @@ function VisitForm({onAdd}) {
   const navigate = useNavigate();
   const { currentUser, adminPropertyFilter } = useAuth();
   const isPropertyScoped = currentUser?.role === "property";
-  const defaultProp = isPropertyScoped
+  const defaultProp = isPropertyScoped && currentUser?.property
     ? currentUser.property
     : (adminPropertyFilter && adminPropertyFilter !== "ALL" ? adminPropertyFilter : "Park Solitaire");
   const [targetProperty, setTargetProperty] = useState(defaultProp);
   const [customOtherTarget, setCustomOtherTarget] = useState("");
   const [form,setForm]=useState(initialForm);
   const [error,setError]=useState("");
+
+  useEffect(() => {
+    if (isPropertyScoped && currentUser?.property) {
+      setTargetProperty(currentUser.property);
+    } else if (adminPropertyFilter && adminPropertyFilter !== "ALL") {
+      setTargetProperty(adminPropertyFilter);
+    }
+  }, [isPropertyScoped, currentUser?.property, adminPropertyFilter]);
+
   const set=(k,v)=>setForm(f=>({...f,[k]:v}));
   const sources=["Pamphlet","Channel Partner","Social Media Ad","Existing Customer","Director Reference","Outdoor Banner","Website","Walk-in"];
   const toggleSource=s=>set("source",form.source.includes(s)?form.source.filter(x=>x!==s):[...form.source,s]);
@@ -4088,15 +4161,21 @@ function VisitForm({onAdd}) {
       setError("Phone number must be exactly 10 digits.");
       return;
     }
-    const assignedProperty = isPropertyScoped
+    const assignedProperty = isPropertyScoped && currentUser?.property
       ? currentUser.property
       : (targetProperty === "Other" && customOtherTarget.trim() ? customOtherTarget.trim() : (targetProperty || "Park Solitaire"));
+    const newId = Date.now();
+    savePropertyToCache(newId, assignedProperty);
+    const cleanCpVal = form.cp ? form.cp.replace(/\[PROP:[^\]]+\]/g, "").trim() : "";
+    const taggedCp = cleanCpVal ? `${cleanCpVal} [PROP:${assignedProperty}]` : `[PROP:${assignedProperty}]`;
+
     onAdd({
       ...form,
-      id:Date.now(),
+      id: newId,
       date: (parseLocalDate(form.date) || new Date()).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}),
       phone: `+91 ${cleanPhone.slice(0, 5)} ${cleanPhone.slice(5)}`,
       propertyName: assignedProperty,
+      cp: taggedCp,
       interest:form.property||"2BHK",
       budget:form.budget||"—",
       profession:form.profession||"—",
@@ -4469,14 +4548,19 @@ function AddClientModal({ isOpen, onClose, onSave, defaultProperty = "Park Solit
       ? `+91 ${cleanDigits.slice(0, 5)} ${cleanDigits.slice(5)}`
       : phone;
 
+    const assignedProp = propertyName || defaultProperty || "Park Solitaire";
+    const newId = Date.now();
+    savePropertyToCache(newId, assignedProp);
+
     onSave({
-      id: Date.now(),
+      id: newId,
       name: name.trim(),
       phone: formattedPhone,
       mail: email.trim(),
       address: address.trim() || "Mumbai",
       profession: profession.trim() || "Client",
-      propertyName,
+      propertyName: assignedProp,
+      cp: `[PROP:${assignedProp}]`,
       interest,
       budget,
       aspiration,
@@ -4675,6 +4759,7 @@ function EditClientModal({ client, isOpen, onClose, onSave }) {
       ? `+91 ${cleanDigits.slice(0, 5)} ${cleanDigits.slice(5)}`
       : phone;
 
+    savePropertyToCache(client.id, propertyName);
     onSave(client.id, {
       name: name.trim(),
       phone: formattedPhone,
@@ -4684,6 +4769,7 @@ function EditClientModal({ client, isOpen, onClose, onSave }) {
       location: address.trim(),
       profession: profession.trim(),
       propertyName,
+      cp: client.cp ? `${client.cp.replace(/\[PROP:[^\]]+\]/g, "").trim()} [PROP:${propertyName}]` : `[PROP:${propertyName}]`,
       interest,
       budget,
       aspiration,
@@ -5241,9 +5327,17 @@ function AppContent() {
 
   const addVisit = (v) => {
     const assignedProperty = v.propertyName || (currentUser?.role === "property" ? currentUser.property : "Park Solitaire");
+    const visitId = v.id || Date.now();
+    savePropertyToCache(visitId, assignedProperty);
+
+    const cleanCpVal = v.cp ? String(v.cp).replace(/\[PROP:[^\]]+\]/g, "").trim() : "";
+    const taggedCp = cleanCpVal ? `${cleanCpVal} [PROP:${assignedProperty}]` : `[PROP:${assignedProperty}]`;
+
     const preparedVisit = {
       ...v,
+      id: visitId,
       propertyName: assignedProperty,
+      cp: taggedCp,
       remarksHistory: v.remarksHistory || (v.remarks ? [{
         id: Date.now(),
         date: v.date || getRelativeDateStr(0),
@@ -5269,7 +5363,7 @@ function AppContent() {
           setVisits((old) => old.map(item => item.id === preparedVisit.id ? {
             ...item,
             ...json.data,
-            propertyName: json.data.propertyName || item.propertyName || assignedProperty
+            propertyName: resolvePropertyName(json.data, item) || assignedProperty
           } : item));
         }
       })
