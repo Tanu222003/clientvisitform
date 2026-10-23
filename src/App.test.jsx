@@ -761,6 +761,44 @@ describe('Park Solitaire Client Visit App', () => {
       });
     });
 
+    it('separates Visit Form and Dashboard for Park Solitaire desk login and displays new visit immediately on Park Solitaire Dashboard', async () => {
+      // Simulate logging in as Park Solitaire Property Desk
+      localStorage.setItem("ps_current_user_v3", JSON.stringify({
+        id: "park-solitaire",
+        role: "property",
+        name: "Park Solitaire Sales Desk",
+        email: "desk@parksolitaire.com",
+        property: "Park Solitaire"
+      }));
+
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <App />
+        </MemoryRouter>
+      );
+
+      // Verify dedicated property desk banner on Visit Form
+      expect(screen.getByText(/Park Solitaire — Dedicated Visit Desk/i)).toBeInTheDocument();
+      expect(screen.getByText(/routed to Park Solitaire/i)).toBeInTheDocument();
+
+      // Fill in and submit the visit form for Park Solitaire
+      const nameInput = screen.getByPlaceholderText('Enter first name');
+      const phoneInput = screen.getByPlaceholderText('10-digit number');
+      fireEvent.change(nameInput, { target: { value: 'Aarav Singhania' } });
+      fireEvent.change(phoneInput, { target: { value: '9819981998' } });
+
+      const submitBtn = screen.getByRole('button', { name: /submit/i });
+      fireEvent.click(submitBtn);
+
+      // Verify redirect to Park Solitaire Dashboard and visit is listed
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { level: 1, name: /Dashboard/i })).toBeInTheDocument();
+        expect(screen.getByText('Park Solitaire Dashboard')).toBeInTheDocument();
+        expect(screen.getByText('Aarav Singhania')).toBeInTheDocument();
+        expect(screen.getByText('+91 98199 81998')).toBeInTheDocument();
+      });
+    });
+
     it('provides Master Admin unified access to all properties in one dashboard without portfolio bar and without property logo', () => {
       // Set Master Admin user
       localStorage.setItem("ps_current_user_v3", JSON.stringify({

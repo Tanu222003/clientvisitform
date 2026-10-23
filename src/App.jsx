@@ -29,11 +29,26 @@ export function toLocalYMD(d) {
 
 function parseLocalDate(d) {
   if (!d) return null;
-  if (d instanceof Date) return d;
+  if (d instanceof Date) return isNaN(d.getTime()) ? null : d;
   if (typeof d === "string") {
-    const isoMatch = d.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const trimmed = d.trim();
+    const isoMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})/);
     if (isoMatch) {
       return new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]));
+    }
+    const monthNames = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+    const dmyMatch = trimmed.match(/^(\d{1,2})[\s\-]+([A-Za-z]{3})[\s\-]+(\d{4})/i);
+    if (dmyMatch) {
+      const day = Number(dmyMatch[1]);
+      const monStr = dmyMatch[2].toLowerCase();
+      const year = Number(dmyMatch[3]);
+      if (monthNames[monStr] !== undefined) {
+        return new Date(year, monthNames[monStr], day);
+      }
+    }
+    const slashMatch = trimmed.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+    if (slashMatch) {
+      return new Date(Number(slashMatch[3]), Number(slashMatch[2]) - 1, Number(slashMatch[1]));
     }
   }
   const dateObj = new Date(d);
@@ -323,8 +338,10 @@ function useVisits() {
                  item.id === 18 ? "Other" : "Park Solitaire")
           }));
           setVisits((prev) => {
-            if (JSON.stringify(prev) !== JSON.stringify(normalized)) {
-              return normalized;
+            const localOnly = prev.filter(p => !normalized.some(n => n.id === p.id));
+            const merged = [...localOnly, ...normalized];
+            if (JSON.stringify(prev) !== JSON.stringify(merged)) {
+              return merged;
             }
             return prev;
           });
@@ -1835,7 +1852,7 @@ function Dashboard({ visits, onUpdateVisit, siteVisits = [] }) {
 
   // Filter recent visits: Today and Yesterday only (with graceful fallback to latest submissions if none recorded)
   const todayAndYesterdayVisits = useMemo(() => {
-    return activeVisits.filter(v => isTodayOrYesterday(v.date));
+    return activeVisits.filter(v => isTodayOrYesterday(v.date) || (typeof v.id === "number" && v.id > Date.now() - 24 * 3600 * 1000));
   }, [activeVisits]);
 
   const recentVisitsBase = useMemo(() => {
@@ -1876,12 +1893,14 @@ function Dashboard({ visits, onUpdateVisit, siteVisits = [] }) {
           <span>
             {isPropertyScoped
               ? `${currentUser?.property || "Property"} Sales Desk • Operations`
-              : "Central CRM Command • Operations Overview"}
+              : (adminPropertyFilter && adminPropertyFilter !== "ALL" ? `${adminPropertyFilter} • Filtered View` : "Central CRM Command • Operations Overview")}
           </span>
         </div>
         <div className="hero-title-row">
           <h1 aria-label="Dashboard">
-            {isPropertyScoped ? `${currentUser?.property || "Property"} Dashboard` : "Admin Dashboard"}
+            {isPropertyScoped
+              ? `${currentUser?.property || "Property"} Dashboard`
+              : (adminPropertyFilter && adminPropertyFilter !== "ALL" ? `${adminPropertyFilter} Dashboard` : "Admin Dashboard")}
           </h1>
           <div className="hero-date-chip">
             <CalendarDays size={14} />
@@ -1891,7 +1910,9 @@ function Dashboard({ visits, onUpdateVisit, siteVisits = [] }) {
         <p className="hero-subtitle">
           {isPropertyScoped
             ? `Exclusive client pipeline, walkthrough tracking, and records for ${currentUser?.property || "this property"}`
-            : "Real-time client pipeline, site walkthrough tracking, and operational overview"}
+            : (adminPropertyFilter && adminPropertyFilter !== "ALL"
+                ? `Filtered operational view and walk-in records for ${adminPropertyFilter}`
+                : "Real-time client pipeline, site walkthrough tracking, and operational overview")}
         </p>
       </div>
 
@@ -1901,6 +1922,51 @@ function Dashboard({ visits, onUpdateVisit, siteVisits = [] }) {
         </NavLink>
       </div>
     </div>
+
+    {/* Admin Property Filter Tabs */}
+    {!isPropertyScoped && (
+      <div className="admin-prop-filter-chips-bar" style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
+        <button
+          type="button"
+          className={`prop-filter-chip-btn ${adminPropertyFilter === "ALL" ? "active" : ""}`}
+          onClick={() => setAdminPropertyFilter("ALL")}
+          style={{
+            padding: "6px 14px",
+            borderRadius: "20px",
+            fontSize: "12px",
+            fontWeight: 600,
+            border: "1px solid",
+            cursor: "pointer",
+            background: adminPropertyFilter === "ALL" ? "#1e293b" : "#ffffff",
+            color: adminPropertyFilter === "ALL" ? "#ffffff" : "#475569",
+            borderColor: adminPropertyFilter === "ALL" ? "#1e293b" : "#cbd5e1"
+          }}
+        >
+          All Properties
+        </button>
+        {AVAILABLE_PROPERTIES.map(p => (
+          <button
+            type="button"
+            key={p.name}
+            className={`prop-filter-chip-btn ${adminPropertyFilter === p.name ? "active" : ""}`}
+            onClick={() => setAdminPropertyFilter(p.name)}
+            style={{
+              padding: "6px 14px",
+              borderRadius: "20px",
+              fontSize: "12px",
+              fontWeight: 600,
+              border: "1px solid",
+              cursor: "pointer",
+              background: adminPropertyFilter === p.name ? "#1e293b" : "#ffffff",
+              color: adminPropertyFilter === p.name ? "#ffffff" : "#475569",
+              borderColor: adminPropertyFilter === p.name ? "#1e293b" : "#cbd5e1"
+            }}
+          >
+            {p.name}
+          </button>
+        ))}
+      </div>
+    )}
 
     {/* Centralized Summary Cards: 5 Key Metrics */}
     <div className="dashboard-summary-cards-grid">
@@ -3982,7 +4048,7 @@ function SimpleTable({rows}) {
  return <div className="simple-table">{rows.map((r,i)=><div className="simple-row" key={i}>{r.map((x,j)=><span key={j} className={j===0?"first":""}>{x}</span>)}</div>)}</div>
 }
 
-const initialForm={name:"",phone:"",email:"",date:new Date().toISOString().slice(0,10),address:"",profession:"",property:"",budget:"",aspiration:"Personal Use",source:[],cp:"",remarks:""};
+const initialForm={name:"",phone:"",email:"",date:toLocalYMD(new Date()),address:"",profession:"",property:"",budget:"",aspiration:"Personal Use",source:[],cp:"",remarks:""};
 
 function VisitForm({onAdd}) {
   const navigate = useNavigate();
@@ -5169,8 +5235,10 @@ function AppContent() {
   const { currentUser, login } = useAuth();
 
   const addVisit = (v) => {
+    const assignedProperty = v.propertyName || (currentUser?.role === "property" ? currentUser.property : "Park Solitaire");
     const preparedVisit = {
       ...v,
+      propertyName: assignedProperty,
       remarksHistory: v.remarksHistory || (v.remarks ? [{
         id: Date.now(),
         date: v.date || getRelativeDateStr(0),
@@ -5193,7 +5261,11 @@ function AppContent() {
       })
       .then((json) => {
         if (json && json.data && json.data.id) {
-          setVisits((old) => old.map(item => item.id === preparedVisit.id ? { ...item, ...json.data } : item));
+          setVisits((old) => old.map(item => item.id === preparedVisit.id ? {
+            ...item,
+            ...json.data,
+            propertyName: json.data.propertyName || item.propertyName || assignedProperty
+          } : item));
         }
       })
       .catch(() => {
