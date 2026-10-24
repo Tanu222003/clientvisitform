@@ -4236,25 +4236,14 @@ function AllVisits({ visits, onUpdateVisit }) {
 
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState("All");
-  const statusFilters = ["Visited", "FollowUp", "Revisited", "Booked", "Closed"];
-  const filters = isPropertyScoped
-    ? [
-        "All",
-        ...statusFilters,
-        "Personal Use",
-        "Investment",
-        "1BHK",
-        "2BHK",
-        "3BHK"
-      ]
-    : [
-        "All",
-        "Personal Use",
-        "Investment",
-        "1BHK",
-        "2BHK",
-        "3BHK"
-      ];
+  const filters = [
+    "All",
+    "Personal Use",
+    "Investment",
+    "1BHK",
+    "2BHK",
+    "3BHK"
+  ];
   const filtered = activeVisits.filter((v) => {
     const text = Object.values(v).join(" ").toLowerCase();
     const match = text.includes(q.toLowerCase());
@@ -4263,9 +4252,6 @@ function AllVisits({ visits, onUpdateVisit }) {
       ok = v.aspiration === filter;
     if (["1BHK", "2BHK", "3BHK"].includes(filter))
       ok = v.interest.includes(filter);
-    if (statusFilters.includes(filter)) {
-      ok = (v.status || "").toLowerCase().replace(/[^a-z]/g, "") === filter.toLowerCase().replace(/[^a-z]/g, "");
-    }
     return match && ok;
   });
   return (
@@ -5531,27 +5517,8 @@ function Clients({ visits, onUpdateVisit, onAddVisit }) {
   const investors = clients.filter(c => c.aspiration === "Investment").length;
   const newThisWeek = 5;
 
-  // Status stage distribution across the pipeline
-  const stageCounts = useMemo(() => {
-    const counts = { Visited: 0, FollowUp: 0, Revisited: 0, Booked: 0, Closed: 0 };
-    clients.forEach(c => {
-      const norm = (c.status || "Visited").toLowerCase().replace(/[^a-z]/g, "");
-      if (norm.includes("close")) counts.Closed++;
-      else if (norm.includes("book")) counts.Booked++;
-      else if (norm.includes("revisit")) counts.Revisited++;
-      else if (norm.includes("follow")) counts.FollowUp++;
-      else counts.Visited++;
-    });
-    return counts;
-  }, [clients]);
-
   const filters = [
     "All",
-    "Visited",
-    "FollowUp",
-    "Revisited",
-    "Booked",
-    "Closed",
     "Personal Use",
     "Investment"
   ];
@@ -5573,10 +5540,6 @@ function Clients({ visits, onUpdateVisit, onAddVisit }) {
         matchFilter = true;
       } else if (filter === "Personal Use" || filter === "Investment") {
         matchFilter = c.aspiration === filter;
-      } else {
-        const norm = (c.status || "Visited").toLowerCase().replace(/[^a-z]/g, "");
-        const targetNorm = filter.toLowerCase().replace(/[^a-z]/g, "");
-        matchFilter = norm === targetNorm;
       }
 
       return matchSearch && matchFilter;
@@ -5656,11 +5619,6 @@ function Clients({ visits, onUpdateVisit, onAddVisit }) {
         {filters.map((x) => {
           let label = x;
           if (x === "All") label = `All (${clients.length})`;
-          else if (x === "Visited") label = `Visited (${stageCounts.Visited})`;
-          else if (x === "FollowUp") label = `Follow-Up (${stageCounts.FollowUp})`;
-          else if (x === "Revisited") label = `Re-visited (${stageCounts.Revisited})`;
-          else if (x === "Booked") label = `Booked (${stageCounts.Booked})`;
-          else if (x === "Closed") label = `Closed (${stageCounts.Closed})`;
           else if (x === "Personal Use") label = `Personal (${personalUse})`;
           else if (x === "Investment") label = `Investors (${investors})`;
 

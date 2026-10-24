@@ -341,8 +341,8 @@ describe('Park Solitaire Client Visit App', () => {
       });
     });
 
-    it('verifies status pills (Visited, FollowUp, Booked, etc.) are removed from admin All Visits menu and filters by aspiration', () => {
-      render(
+    it('verifies status pills (Visited, FollowUp, Booked, etc.) are removed from all properties and admin All Visits menu and filters by aspiration', () => {
+      const { unmount } = render(
         <MemoryRouter initialEntries={['/visits']}>
           <App />
         </MemoryRouter>
@@ -362,6 +362,25 @@ describe('Park Solitaire Client Visit App', () => {
       expect(screen.getByText('Amit Verma')).toBeInTheDocument();
       // Rahul Sharma is Personal Use, so should not be in filtered list
       expect(screen.queryByText('Rahul Sharma')).not.toBeInTheDocument();
+      unmount();
+
+      // Verify also removed for Property Desk
+      localStorage.setItem("ps_current_user_v3", JSON.stringify({
+        id: "park-desk",
+        role: "property",
+        name: "Park Solitaire Desk",
+        email: "desk@parksolitaire.com",
+        property: "Park Solitaire"
+      }));
+
+      render(
+        <MemoryRouter initialEntries={['/visits']}>
+          <App />
+        </MemoryRouter>
+      );
+      expect(screen.queryByRole('button', { name: 'Visited' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'FollowUp' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Booked' })).not.toBeInTheDocument();
     });
   });
 
@@ -572,28 +591,35 @@ describe('Park Solitaire Client Visit App', () => {
       expect(snehaCard).toHaveTextContent('Sneha Reddy');
     });
 
-    it('filters clients using pipeline status pills on the Clients screen', () => {
+    it('verifies status filter pills (Visited, FollowUp, Booked, etc.) are removed from Clients screen and filters by aspiration', () => {
       render(
         <MemoryRouter initialEntries={['/clients']}>
           <App />
         </MemoryRouter>
       );
 
-      // Click 'Booked' status filter pill
-      const bookedPill = screen.getByRole('button', { name: /^Booked \(/i });
-      fireEvent.click(bookedPill);
+      // Verify status pills like Visited, Follow-Up, Re-visited, Booked, Closed are removed
+      expect(screen.queryByRole('button', { name: /^Visited/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /^Follow-Up/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /^Re-visited/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /^Booked/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /^Closed/i })).not.toBeInTheDocument();
 
-      // Only Booked clients should be visible
-      expect(screen.getByText('Sneha Reddy')).toBeInTheDocument();
+      // Click 'Investors' filter pill
+      const investorsPill = screen.getByRole('button', { name: /^Investors \(/i });
+      fireEvent.click(investorsPill);
+
+      // Only Investment clients should be visible
+      expect(screen.getByText('Priya Patel')).toBeInTheDocument();
       expect(screen.queryByText('Rahul Sharma')).not.toBeInTheDocument();
 
-      // Click 'Visited' status filter pill
-      const visitedPill = screen.getByRole('button', { name: /^Visited \(/i });
-      fireEvent.click(visitedPill);
+      // Click 'Personal' filter pill
+      const personalPill = screen.getByRole('button', { name: /^Personal \(/i });
+      fireEvent.click(personalPill);
 
-      // Rahul Sharma should be visible now, Sneha Reddy should be filtered out
+      // Rahul Sharma should be visible now, Priya Patel should be filtered out
       expect(screen.getByText('Rahul Sharma')).toBeInTheDocument();
-      expect(screen.queryByText('Sneha Reddy')).not.toBeInTheDocument();
+      expect(screen.queryByText('Priya Patel')).not.toBeInTheDocument();
     });
 
     it('displays latest remark callout box with note text on client card', () => {
