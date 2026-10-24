@@ -79,16 +79,16 @@ function isTodayOrYesterday(dateStr) {
 
 export const AVAILABLE_PROPERTIES = [
   {
-    id: "park-solitaire",
-    name: "Park Solitaire Lifespaces LLP",
-    shortName: "Park Solitaire",
+    id: "mudita",
+    name: "Mudita",
+    shortName: "Mudita",
     category: "Residential",
-    tagline: "Signature Luxury Residences",
-    location: "Andheri West, Mumbai",
+    tagline: "Builders and Developers",
+    location: "Mumbai",
     accentColor: "#c29135",
     badgeClass: "badge-gold",
     units: ["1BHK", "2BHK", "3BHK", "2BHK Jodi"],
-    logo: logoImg
+    logo: muditaLogoImg
   },
   {
     id: "veena-developer",
@@ -708,10 +708,10 @@ function PropertyBrand({ propertyName, subtitle }) {
 
 function LoginScreen({ onLogin }) {
   const [tab, setTab] = useState("property");
-  const [selectedProperty, setSelectedProperty] = useState("Park Solitaire Lifespaces LLP");
+  const [selectedProperty, setSelectedProperty] = useState("Mudita");
   const [customPropertyName, setCustomPropertyName] = useState("");
   const [deskName, setDeskName] = useState("Sales Desk");
-  const [pin, setPin] = useState("solitaire123");
+  const [pin, setPin] = useState("mudita123");
   const [adminUser, setAdminUser] = useState("admin");
   const [adminPass, setAdminPass] = useState("admin123");
   const [error, setError] = useState("");
@@ -748,13 +748,19 @@ function LoginScreen({ onLogin }) {
 
   const activeDisplayProp = (selectedProperty === "Other" && customPropertyName.trim())
     ? customPropertyName.trim()
-    : (selectedProperty === "Park Solitaire Lifespaces LLP" ? "Park Solitaire" : selectedProperty);
+    : selectedProperty;
 
   return (
     <div className="login-portal-page">
       <div className="login-portal-card">
         <div className="login-portal-brand">
-          <Logo />
+          <div className="brand portal-brand-mudita">
+            <img src={muditaLogoImg} alt="Mudita" className="brand-logo" />
+            <div>
+              <div className="brand-name">Mudita</div>
+              <div className="brand-sub">Builders and Developers</div>
+            </div>
+          </div>
           <div className="login-portal-tag">
             <Sparkles size={13} className="hero-badge-sparkle" />
             <span>OPERATIONS ACCESS PORTAL</span>
@@ -799,6 +805,7 @@ function LoginScreen({ onLogin }) {
                       if (lower.includes("veena")) setPin("veena123");
                       else if (lower.includes("luxury")) setPin("luxury123");
                       else if (lower.includes("other")) setPin("desk123");
+                      else if (lower.includes("mudita")) setPin("mudita123");
                       else setPin("solitaire123");
                     }}
                   >
@@ -858,7 +865,9 @@ function LoginScreen({ onLogin }) {
                         ? "PIN (luxury123)"
                         : selectedProperty === "Other"
                           ? "PIN (desk123)"
-                          : "PIN (solitaire123)"
+                          : selectedProperty.toLowerCase().includes("mudita")
+                            ? "PIN (mudita123)"
+                            : "PIN (solitaire123)"
                   }
                 />
               </div>
