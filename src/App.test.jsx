@@ -950,17 +950,17 @@ describe('Park Solitaire Client Visit App', () => {
       expect(screen.queryByText('Rahul Sharma')).not.toBeInTheDocument();
     });
 
-    it('verifies Add Client option is removed for admin and allows editing client records on Clients screen', async () => {
-      render(
+    it('verifies Add Client option is removed for all properties and admin and allows editing client records on Clients screen', async () => {
+      // 1. Verify Add Client button is removed for Admin
+      const { unmount } = render(
         <MemoryRouter initialEntries={['/clients']}>
           <App />
         </MemoryRouter>
       );
 
-      // 1. Verify Add Client button is removed for Admin
       expect(screen.queryByRole('button', { name: /add client/i })).not.toBeInTheDocument();
 
-      // 2. Click Edit on Rahul Sharma
+      // Click Edit on Rahul Sharma
       const editButtons = screen.getAllByRole('button', { name: /edit/i });
       expect(editButtons.length).toBeGreaterThan(0);
       fireEvent.click(editButtons[0]);
@@ -969,6 +969,23 @@ describe('Park Solitaire Client Visit App', () => {
       const saveEditBtn = screen.getByRole('button', { name: /Save Client Changes/i });
       expect(saveEditBtn).toBeInTheDocument();
       fireEvent.click(saveEditBtn);
+      unmount();
+
+      // 2. Verify Add Client button is also removed for Property Desk
+      localStorage.setItem("ps_current_user_v3", JSON.stringify({
+        id: "park-desk",
+        role: "property",
+        name: "Park Solitaire Desk",
+        email: "desk@parksolitaire.com",
+        property: "Park Solitaire"
+      }));
+
+      render(
+        <MemoryRouter initialEntries={['/clients']}>
+          <App />
+        </MemoryRouter>
+      );
+      expect(screen.queryByRole('button', { name: /add client/i })).not.toBeInTheDocument();
     });
   });
 

@@ -5592,11 +5592,6 @@ function Clients({ visits, onUpdateVisit, onAddVisit }) {
         <button className="btn secondary" onClick={() => exportClientsCSV(clients)}>
           <Download size={14} /> Export
         </button>
-        {isPropertyScoped && (
-          <button className="btn primary" onClick={() => setIsAddOpen(true)}>
-            <Plus size={14} /> Add Client
-          </button>
-        )}
       </PageHead>
 
       {/* Admin Portfolio Property Filter Bar */}
