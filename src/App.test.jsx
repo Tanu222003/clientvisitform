@@ -1048,19 +1048,15 @@ describe('Park Solitaire Client Visit App', () => {
       expect(screen.getByText(/Loved the double-height ceiling and duplex terrace/i)).toBeInTheDocument();
     });
 
-    it('renders proper calendar navigation, month/year selector, and status key legend', () => {
+    it('renders proper calendar navigation and month/year selector without status key legend', () => {
       render(
         <MemoryRouter initialEntries={['/site-visits']}>
           <App />
         </MemoryRouter>
       );
 
-      // Verify Status Key legend items
-      expect(screen.getByText('Status Key:')).toBeInTheDocument();
-      expect(screen.getAllByText('Scheduled').length).toBeGreaterThan(0);
-      expect(screen.getAllByText('Confirmed').length).toBeGreaterThan(0);
-      expect(screen.getAllByText('Completed').length).toBeGreaterThan(0);
-      expect(screen.getAllByText('Rescheduled').length).toBeGreaterThan(0);
+      // Verify Status Key legend is removed
+      expect(screen.queryByText('Status Key:')).not.toBeInTheDocument();
 
       // Month/Year selects
       expect(screen.getByRole('combobox', { name: /Select Month/i })).toBeInTheDocument();
@@ -1196,8 +1192,8 @@ describe('Park Solitaire Client Visit App', () => {
         </MemoryRouter>
       );
 
-      // Verify calendar is rendered with status key
-      expect(screen.getByText('Status Key:')).toBeInTheDocument();
+      // Verify Status Key legend is removed
+      expect(screen.queryByText('Status Key:')).not.toBeInTheDocument();
 
       // Check chips for visited clients and their reminders
       expect(screen.getAllByText(/Priya Patel/i).length).toBeGreaterThan(0);

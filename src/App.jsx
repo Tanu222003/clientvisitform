@@ -3137,22 +3137,6 @@ function CalendarView({
         </div>
       </div>
 
-      <div className="cal-legend-bar">
-        <span className="cal-legend-label">Status Key:</span>
-        <div className="cal-legend-items">
-          <span className="cal-legend-item"><span className="cal-legend-dot scheduled"></span> Scheduled</span>
-          <span className="cal-legend-item"><span className="cal-legend-dot confirmed"></span> Confirmed</span>
-          <span className="cal-legend-item"><span className="cal-legend-dot completed"></span> Completed</span>
-          <span className="cal-legend-item"><span className="cal-legend-dot rescheduled"></span> Rescheduled</span>
-          <span className="cal-legend-item"><span className="cal-legend-dot followup"></span> Follow-Up</span>
-          <span className="cal-legend-item"><span className="cal-legend-dot revisit"></span> Re-visit</span>
-          <span className="cal-legend-item"><span className="cal-legend-dot booked"></span> Booked</span>
-          <span className="cal-legend-item"><span className="cal-legend-dot visited"></span> Visited</span>
-          <span className="cal-legend-item"><span className="cal-legend-dot cancelled"></span> Cancelled</span>
-          <span className="cal-legend-item"><span className="cal-legend-dot noshow"></span> No-show</span>
-        </div>
-      </div>
-
       <div className="calendar-weekdays">
         <div className="calendar-weekday-cell">Sun</div>
         <div className="calendar-weekday-cell">Mon</div>
