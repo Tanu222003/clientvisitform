@@ -1179,7 +1179,114 @@ describe('Park Solitaire Client Visit App', () => {
       expect(screen.queryByAltText('Luxury Empire')).not.toBeInTheDocument();
     });
   });
+
+  describe('Visited Client Calendar Reminders (Admin & Property Desk)', () => {
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
+    it('renders visited client reminders (Follow-Up, Re-visit, Booked) on the calendar for admin', () => {
+      localStorage.setItem("ps_current_user_v3", JSON.stringify({
+        id: "admin",
+        role: "admin",
+        name: "Master Admin",
+        email: "admin@parksolitaire.com",
+        property: "ALL"
+      }));
+
+      render(
+        <MemoryRouter initialEntries={['/site-visits']}>
+          <App />
+        </MemoryRouter>
+      );
+
+      // Verify Category filter chips are rendered
+      expect(screen.getByRole('button', { name: /Follow-ups/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Re-visits/i })).toBeInTheDocument();
+      expect(screen.getAllByRole('button', { name: /Booked/i }).length).toBeGreaterThan(0);
+
+      // Check chips for visited clients and their reminders
+      expect(screen.getAllByText(/Priya Patel/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/Amit Verma/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/Sneha Reddy/i).length).toBeGreaterThan(0);
+    });
+
+    it('isolates calendar reminders so Property Desk only sees its own property visited clients', () => {
+      // Login as Park Solitaire property desk
+      localStorage.setItem("ps_current_user_v3", JSON.stringify({
+        id: "park-desk",
+        role: "property",
+        name: "Park Solitaire Desk",
+        email: "desk@parksolitaire.com",
+        property: "Park Solitaire"
+      }));
+
+      render(
+        <MemoryRouter initialEntries={['/site-visits']}>
+          <App />
+        </MemoryRouter>
+      );
+
+      // Park Solitaire clients should be present
+      expect(screen.getAllByText(/Priya Patel/i).length).toBeGreaterThan(0);
+
+      // Other property clients (Amit Verma is Veena Developer) must NOT appear
+      expect(screen.queryByText(/Amit Verma/i)).not.toBeInTheDocument();
+    });
+
+    it('provides direct Call and WhatsApp communication buttons on client calendar cards', () => {
+      localStorage.setItem("ps_current_user_v3", JSON.stringify({
+        id: "admin",
+        role: "admin",
+        name: "Master Admin",
+        email: "admin@parksolitaire.com",
+        property: "ALL"
+      }));
+
+      render(
+        <MemoryRouter initialEntries={['/site-visits']}>
+          <App />
+        </MemoryRouter>
+      );
+
+      // Verify Call and WhatsApp buttons are present on selected day cards
+      const callButtons = screen.getAllByRole('link', { name: /Call/i });
+      const waButtons = screen.getAllByRole('link', { name: /WhatsApp/i });
+
+      expect(callButtons.length).toBeGreaterThan(0);
+      expect(waButtons.length).toBeGreaterThan(0);
+      expect(callButtons[0]).toHaveAttribute('href', expect.stringContaining('tel:'));
+      expect(waButtons[0]).toHaveAttribute('href', expect.stringContaining('wa.me'));
+    });
+
+    it('allows opening client reminder modal from calendar day panel', () => {
+      localStorage.setItem("ps_current_user_v3", JSON.stringify({
+        id: "admin",
+        role: "admin",
+        name: "Master Admin",
+        email: "admin@parksolitaire.com",
+        property: "ALL"
+      }));
+
+      render(
+        <MemoryRouter initialEntries={['/site-visits']}>
+          <App />
+        </MemoryRouter>
+      );
+
+      // Click Set Client Reminder button in day panel
+      const setRemBtn = screen.getByRole('button', { name: /Set Client Reminder/i });
+      expect(setRemBtn).toBeInTheDocument();
+      fireEvent.click(setRemBtn);
+
+      // Verify modal opens with visited client selection
+      expect(screen.getByRole('heading', { level: 3, name: 'Schedule Client Reminder' })).toBeInTheDocument();
+      expect(screen.getByText(/Select Visited Client/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Save Reminder/i })).toBeInTheDocument();
+    });
+  });
 });
+
 
 
 

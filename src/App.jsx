@@ -898,7 +898,7 @@ function Layout({children}) {
 
   const nav = [
     ["/admin", <LayoutDashboard size={18}/>, "Dashboard"],
-    ["/site-visits", <CalendarDays size={18}/>, "Site Visits"],
+    ["/site-visits", <CalendarDays size={18}/>, "Calendar"],
     ["/visits", <ClipboardList size={18}/>, "All Visits"],
     ["/clients", <Users size={18}/>, "Clients"],
     ["/reports", <BarChart3 size={18}/>, "Reports"],
@@ -1090,26 +1090,46 @@ function isWebsiteVisit(v) {
   return v.source.toLowerCase().includes("website");
 }
 
-function ScheduleReminderModal({ visits, initialVisit, isOpen, onClose, onSave }) {
+function ScheduleReminderModal({ visits = [], initialVisit, isOpen, onClose, onSave, defaultDate = "", defaultType = "followup" }) {
   if (!isOpen) return null;
 
-  const websiteVisits = visits.filter(isWebsiteVisit);
-  const [selectedId, setSelectedId] = useState(() => initialVisit ? initialVisit.id : (websiteVisits[0]?.id || ""));
-  const [type, setType] = useState(() => (initialVisit?.status === "Revisited" || initialVisit?.revisitDate) ? "revisit" : "followup");
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const selectableVisits = visits && visits.length > 0 ? visits : [];
+  const [selectedId, setSelectedId] = useState(() => initialVisit ? initialVisit.id : (selectableVisits[0]?.id || ""));
+  const [type, setType] = useState(() => defaultType || ((initialVisit?.status === "Revisited" || initialVisit?.revisitDate) ? "revisit" : "followup"));
+  const [date, setDate] = useState(() => defaultDate || new Date().toISOString().slice(0, 10));
   const [note, setNote] = useState(() => initialVisit?.remarks || "");
+
+  useEffect(() => {
+    if (initialVisit) {
+      setSelectedId(initialVisit.id);
+      if (initialVisit.remarks) setNote(initialVisit.remarks);
+      if (defaultType) {
+        setType(defaultType);
+      } else {
+        setType((initialVisit?.status === "Revisited" || initialVisit?.revisitDate) ? "revisit" : "followup");
+      }
+    } else if (selectableVisits.length > 0 && !selectedId) {
+      setSelectedId(selectableVisits[0].id);
+    }
+    if (defaultDate) {
+      setDate(defaultDate);
+    }
+    if (defaultType) {
+      setType(defaultType);
+    }
+  }, [initialVisit, defaultDate, defaultType, isOpen]);
 
   const handleQuickDate = (offsetDays) => {
     const d = new Date();
     d.setDate(d.getDate() + offsetDays);
-    setDate(d.toISOString().slice(0, 10));
+    setDate(toLocalYMD(d));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!selectedId) return;
     onSave({
-      visitId: Number(selectedId),
+      visitId: selectedId,
       type,
       date,
       note
@@ -1126,8 +1146,8 @@ function ScheduleReminderModal({ visits, initialVisit, isOpen, onClose, onSave }
               <Bell size={18} />
             </div>
             <div>
-              <h3>Schedule Action Reminder</h3>
-              <p>Set a follow-up call or revisit date for website inquiries</p>
+              <h3>Schedule Client Reminder</h3>
+              <p>Set a follow-up call, client revisit, or action reminder</p>
             </div>
           </div>
           <button type="button" className="reminder-modal-close" onClick={onClose} aria-label="Close modal">
@@ -1137,21 +1157,21 @@ function ScheduleReminderModal({ visits, initialVisit, isOpen, onClose, onSave }
 
         <form onSubmit={handleSubmit} className="reminder-modal-form">
           <div className="reminder-form-field">
-            <label>Select Website Client *</label>
+            <label>Select Visited Client *</label>
             <select
               value={selectedId}
               onChange={(e) => {
-                const vid = Number(e.target.value);
+                const vid = Number(e.target.value) || e.target.value;
                 setSelectedId(vid);
-                const match = websiteVisits.find((v) => v.id === vid);
+                const match = selectableVisits.find((v) => v.id === vid);
                 if (match && match.remarks) setNote(match.remarks);
               }}
               className="reminder-form-control"
               required
             >
-              {websiteVisits.map((v) => (
+              {selectableVisits.map((v) => (
                 <option key={v.id} value={v.id}>
-                  {v.name} ({v.interest || "Apartment"} • {v.phone})
+                  {v.name} ({v.propertyName || "Property"} • {v.interest || "Apartment"} • {v.phone})
                 </option>
               ))}
             </select>
@@ -1970,8 +1990,8 @@ function Dashboard({ visits, onUpdateVisit, siteVisits = [] }) {
       </div>
 
       <div className="hero-actions">
-        <NavLink to="/site-visits" className="btn-hero-primary" title="Site Visits Management">
-          <CalendarDays size={16} /> Site Visits
+        <NavLink to="/site-visits" className="btn-hero-primary" title="Calendar & Site Visits">
+          <CalendarDays size={16} /> Calendar
         </NavLink>
       </div>
     </div>
@@ -2931,7 +2951,16 @@ function CompleteSiteVisitModal({ visit, isOpen, onClose, onSave }) {
   );
 }
 
-function CalendarView({ visits, onSelectDate, onSelectVisit, onCompleteVisit, currentMonth, setCurrentMonth }) {
+function CalendarView({
+  visits = [],
+  onSelectDate,
+  onSelectVisit,
+  onCompleteVisit,
+  onUpdateVisit,
+  onOpenReminderModal,
+  currentMonth,
+  setCurrentMonth
+}) {
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
 
@@ -2944,6 +2973,8 @@ function CalendarView({ visits, onSelectDate, onSelectVisit, onCompleteVisit, cu
     }
     return toLocalYMD(new Date(year, month, 1));
   });
+
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
   useEffect(() => {
     const selParsed = parseLocalDate(selectedIsoDate);
@@ -2982,6 +3013,29 @@ function CalendarView({ visits, onSelectDate, onSelectVisit, onCompleteVisit, cu
     setCurrentMonth(new Date(newY, month, 1));
   };
 
+  const categoryCounts = useMemo(() => {
+    const followups = visits.filter(v => v.reminderCategory === "followup").length;
+    const revisits = visits.filter(v => v.reminderCategory === "revisit").length;
+    const booked = visits.filter(v => v.reminderCategory === "booked").length;
+    const walkthroughs = visits.filter(v => v.reminderCategory === "walkthrough" || v.reminderCategory === "visited").length;
+    return {
+      all: visits.length,
+      followup: followups,
+      revisit: revisits,
+      booked: booked,
+      walkthrough: walkthroughs
+    };
+  }, [visits]);
+
+  const filteredVisits = useMemo(() => {
+    if (categoryFilter === "all") return visits;
+    if (categoryFilter === "followup") return visits.filter(v => v.reminderCategory === "followup");
+    if (categoryFilter === "revisit") return visits.filter(v => v.reminderCategory === "revisit");
+    if (categoryFilter === "booked") return visits.filter(v => v.reminderCategory === "booked");
+    if (categoryFilter === "walkthrough") return visits.filter(v => v.reminderCategory === "walkthrough" || v.reminderCategory === "visited");
+    return visits;
+  }, [visits, categoryFilter]);
+
   const firstDayOfWeek = new Date(year, month, 1).getDay(); // 0 is Sunday
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const prevMonthLastDate = new Date(year, month, 0).getDate();
@@ -2993,7 +3047,7 @@ function CalendarView({ visits, onSelectDate, onSelectVisit, onCompleteVisit, cu
     const dayNum = prevMonthLastDate - i;
     const prevDate = new Date(year, month - 1, dayNum);
     const isoDate = toLocalYMD(prevDate);
-    const dayVisits = visits.filter(v => toLocalYMD(v.visitDate) === isoDate);
+    const dayVisits = filteredVisits.filter(v => toLocalYMD(v.visitDate) === isoDate);
     cells.push({
       key: `prev-${dayNum}`,
       dayNum,
@@ -3010,7 +3064,7 @@ function CalendarView({ visits, onSelectDate, onSelectVisit, onCompleteVisit, cu
   for (let d = 1; d <= daysInMonth; d++) {
     const dateObj = new Date(year, month, d);
     const isoDate = toLocalYMD(dateObj);
-    const dayVisits = visits.filter(v => toLocalYMD(v.visitDate) === isoDate);
+    const dayVisits = filteredVisits.filter(v => toLocalYMD(v.visitDate) === isoDate);
     cells.push({
       key: `curr-${d}`,
       dayNum: d,
@@ -3029,7 +3083,7 @@ function CalendarView({ visits, onSelectDate, onSelectVisit, onCompleteVisit, cu
   for (let nextD = 1; nextD <= remainingCells; nextD++) {
     const nextDate = new Date(year, month + 1, nextD);
     const isoDate = toLocalYMD(nextDate);
-    const dayVisits = visits.filter(v => toLocalYMD(v.visitDate) === isoDate);
+    const dayVisits = filteredVisits.filter(v => toLocalYMD(v.visitDate) === isoDate);
     cells.push({
       key: `next-${nextD}`,
       dayNum: nextD,
@@ -3043,8 +3097,8 @@ function CalendarView({ visits, onSelectDate, onSelectVisit, onCompleteVisit, cu
   }
 
   const selectedDateVisits = useMemo(() => {
-    return visits.filter(v => toLocalYMD(v.visitDate) === selectedIsoDate);
-  }, [visits, selectedIsoDate]);
+    return filteredVisits.filter(v => toLocalYMD(v.visitDate) === selectedIsoDate);
+  }, [filteredVisits, selectedIsoDate]);
 
   const selectedDateFormatted = useMemo(() => {
     const p = parseLocalDate(selectedIsoDate);
@@ -3060,11 +3114,11 @@ function CalendarView({ visits, onSelectDate, onSelectVisit, onCompleteVisit, cu
   const isSelectedToday = selectedIsoDate === todayKey;
 
   const currentMonthVisitsCount = useMemo(() => {
-    return visits.filter(v => {
+    return filteredVisits.filter(v => {
       const d = parseLocalDate(v.visitDate);
       return d && d.getFullYear() === year && d.getMonth() === month;
     }).length;
-  }, [visits, year, month]);
+  }, [filteredVisits, year, month]);
 
   return (
     <div className="calendar-container">
@@ -3077,10 +3131,10 @@ function CalendarView({ visits, onSelectDate, onSelectVisit, onCompleteVisit, cu
             <div className="calendar-month-heading-row">
               <h3>{monthName}</h3>
               <span className="cal-month-badge">
-                {currentMonthVisitsCount} {currentMonthVisitsCount === 1 ? "Walkthrough" : "Walkthroughs"}
+                {currentMonthVisitsCount} {currentMonthVisitsCount === 1 ? "Event & Reminder" : "Events & Reminders"}
               </span>
             </div>
-            <p className="cal-subtitle">Interactive schedule & property walkthrough management</p>
+            <p className="cal-subtitle">Visited client pipeline, follow-up calls, revisits, booked deals & walkthroughs</p>
           </div>
         </div>
 
@@ -3118,6 +3172,47 @@ function CalendarView({ visits, onSelectDate, onSelectVisit, onCompleteVisit, cu
         </div>
       </div>
 
+      <div className="cal-category-bar">
+        <span className="cal-category-label">Filter View:</span>
+        <div className="cal-category-chips">
+          <button
+            type="button"
+            className={`cal-cat-chip ${categoryFilter === "all" ? "active" : ""}`}
+            onClick={() => setCategoryFilter("all")}
+          >
+            All Events ({categoryCounts.all})
+          </button>
+          <button
+            type="button"
+            className={`cal-cat-chip cat-followup ${categoryFilter === "followup" ? "active" : ""}`}
+            onClick={() => setCategoryFilter("followup")}
+          >
+            <Bell size={11} /> Follow-ups ({categoryCounts.followup})
+          </button>
+          <button
+            type="button"
+            className={`cal-cat-chip cat-revisit ${categoryFilter === "revisit" ? "active" : ""}`}
+            onClick={() => setCategoryFilter("revisit")}
+          >
+            <CalendarDays size={11} /> Re-visits ({categoryCounts.revisit})
+          </button>
+          <button
+            type="button"
+            className={`cal-cat-chip cat-booked ${categoryFilter === "booked" ? "active" : ""}`}
+            onClick={() => setCategoryFilter("booked")}
+          >
+            <Check size={11} /> Booked ({categoryCounts.booked})
+          </button>
+          <button
+            type="button"
+            className={`cal-cat-chip cat-walkthrough ${categoryFilter === "walkthrough" ? "active" : ""}`}
+            onClick={() => setCategoryFilter("walkthrough")}
+          >
+            <CheckCircle2 size={11} /> Walkthroughs ({categoryCounts.walkthrough})
+          </button>
+        </div>
+      </div>
+
       <div className="cal-legend-bar">
         <span className="cal-legend-label">Status Key:</span>
         <div className="cal-legend-items">
@@ -3125,6 +3220,10 @@ function CalendarView({ visits, onSelectDate, onSelectVisit, onCompleteVisit, cu
           <span className="cal-legend-item"><span className="cal-legend-dot confirmed"></span> Confirmed</span>
           <span className="cal-legend-item"><span className="cal-legend-dot completed"></span> Completed</span>
           <span className="cal-legend-item"><span className="cal-legend-dot rescheduled"></span> Rescheduled</span>
+          <span className="cal-legend-item"><span className="cal-legend-dot followup"></span> Follow-Up</span>
+          <span className="cal-legend-item"><span className="cal-legend-dot revisit"></span> Re-visit</span>
+          <span className="cal-legend-item"><span className="cal-legend-dot booked"></span> Booked</span>
+          <span className="cal-legend-item"><span className="cal-legend-dot visited"></span> Visited</span>
           <span className="cal-legend-item"><span className="cal-legend-dot cancelled"></span> Cancelled</span>
           <span className="cal-legend-item"><span className="cal-legend-dot noshow"></span> No-show</span>
         </div>
@@ -3155,7 +3254,7 @@ function CalendarView({ visits, onSelectDate, onSelectVisit, onCompleteVisit, cu
                 </span>
                 <div className="cal-day-actions">
                   {cell.visits.length > 0 && (
-                    <span className="cal-visit-count-tag" title={`${cell.visits.length} scheduled visits`}>
+                    <span className="cal-visit-count-tag" title={`${cell.visits.length} events & reminders`}>
                       {cell.visits.length}
                     </span>
                   )}
@@ -3178,15 +3277,18 @@ function CalendarView({ visits, onSelectDate, onSelectVisit, onCompleteVisit, cu
                 {cell.visits.slice(0, 3).map(v => (
                   <div
                     key={v.id}
-                    className={`cal-visit-chip ${getStatusBadgeClass(v.status)}`}
+                    className={`cal-visit-chip ${v.statusBadgeClass || getStatusBadgeClass(v.status)} ${v.reminderCategory ? `cal-chip-${v.reminderCategory}` : ""}`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (onSelectVisit) onSelectVisit(v);
+                      setSelectedIsoDate(cell.isoDate);
+                      if (v.sourceType === "site-visit" && onSelectVisit) {
+                        onSelectVisit(v.sourceSiteVisit || v);
+                      }
                     }}
-                    title={`${v.clientName} (${v.propertyName}) • ${v.visitTime || "11:00 AM"} • ${v.status || "Scheduled"}`}
+                    title={`${v.displayTitle || v.clientName} (${v.propertyName}) • ${v.visitTime || "Scheduled"} • ${v.status || "Active"}`}
                   >
                     <span className="chip-time">{v.visitTime || "11:00 AM"}</span>
-                    <span className="chip-name">{v.clientName}</span>
+                    <span className="chip-name">{v.displayTitle || v.clientName}</span>
                   </div>
                 ))}
                 {cell.visits.length > 3 && (
@@ -3215,49 +3317,85 @@ function CalendarView({ visits, onSelectDate, onSelectVisit, onCompleteVisit, cu
                 <h4>{selectedDateFormatted}</h4>
                 {isSelectedToday && <span className="sv-chip-today">TODAY</span>}
                 <span className="cal-panel-count-badge">
-                  {selectedDateVisits.length} {selectedDateVisits.length === 1 ? "Walkthrough" : "Walkthroughs"}
+                  {selectedDateVisits.length} {selectedDateVisits.length === 1 ? "Event & Reminder" : "Events & Reminders"}
                 </span>
               </div>
-              <p>Selected date schedule & quick client actions</p>
+              <p>Selected date schedule, client action reminders & quick communication</p>
             </div>
           </div>
 
-          <button
-            type="button"
-            className="btn primary btn-schedule-day"
-            onClick={() => onSelectDate(selectedIsoDate)}
-          >
-            <Plus size={14} /> Schedule Visit on this Date
-          </button>
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="btn secondary btn-add-reminder-day"
+              onClick={() => onOpenReminderModal && onOpenReminderModal(null, "followup", selectedIsoDate)}
+            >
+              <Bell size={13} /> Set Client Reminder
+            </button>
+            <button
+              type="button"
+              className="btn primary btn-schedule-day"
+              onClick={() => onSelectDate(selectedIsoDate)}
+            >
+              <Plus size={14} /> Schedule Visit on this Date
+            </button>
+          </div>
         </div>
 
         {selectedDateVisits.length === 0 ? (
           <div className="cal-day-empty-state">
             <CalendarDays size={24} />
-            <p>No site visits scheduled for this date.</p>
-            <button
-              type="button"
-              className="btn secondary btn-sm"
-              onClick={() => onSelectDate(selectedIsoDate)}
-            >
-              <Plus size={12} /> Book Client Walkthrough
-            </button>
+            <p>No site visits or client reminders scheduled for this date.</p>
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center" }}>
+              <button
+                type="button"
+                className="btn secondary btn-sm"
+                onClick={() => onSelectDate(selectedIsoDate)}
+              >
+                <Plus size={12} /> Book Client Walkthrough
+              </button>
+              <button
+                type="button"
+                className="btn secondary btn-sm"
+                onClick={() => onOpenReminderModal && onOpenReminderModal(null, "followup", selectedIsoDate)}
+              >
+                <Bell size={12} /> Set Client Follow-up
+              </button>
+            </div>
           </div>
         ) : (
           <div className="cal-day-visits-grid">
             {selectedDateVisits.map(v => {
               const telUrl = `tel:${cleanTel(v.phone)}`;
-              const waUrl = `https://wa.me/${cleanWa(v.phone)}?text=${encodeURIComponent(`Hello ${v.clientName}, looking forward to welcoming you for your site visit at ${v.propertyName} scheduled on ${v.visitDate} at ${v.visitTime}. Let us know if you need assistance!`)}`;
+              let waText = `Hello ${v.clientName}, looking forward to welcoming you for your site visit at ${v.propertyName}!`;
+              if (v.reminderCategory === "followup") {
+                waText = `Hello ${v.clientName}, following up regarding your visit to ${v.propertyName}${v.interest ? ` for ${v.interest}` : ""}. How can we assist you with the booking?`;
+              } else if (v.reminderCategory === "revisit") {
+                waText = `Hello ${v.clientName}, we are looking forward to welcoming you for your re-visit to ${v.propertyName} today. Let us know if you need assistance!`;
+              } else if (v.reminderCategory === "booked") {
+                waText = `Hello ${v.clientName}, congratulations on your booking at ${v.propertyName}!`;
+              } else if (v.reminderCategory === "visited") {
+                waText = `Hello ${v.clientName}, thank you for visiting ${v.propertyName}. Please let us know if you would like to schedule a revisit or review unit pricing!`;
+              }
+              const waUrl = `https://wa.me/${cleanWa(v.phone)}?text=${encodeURIComponent(waText)}`;
 
               return (
-                <div key={v.id} className={`cal-day-visit-card ${getStatusBadgeClass(v.status)}`}>
+                <div key={v.id} className={`cal-day-visit-card ${v.statusBadgeClass || getStatusBadgeClass(v.status)}`}>
                   <div className="cal-dcard-top">
                     <div className="cal-dcard-time">
-                      <Clock size={13} />
+                      {v.reminderCategory === "followup" ? <Bell size={13} style={{ color: "#d97706" }} /> :
+                       v.reminderCategory === "revisit" ? <CalendarDays size={13} style={{ color: "#0284c7" }} /> :
+                       v.reminderCategory === "booked" ? <Check size={13} style={{ color: "#7e22ce" }} /> :
+                       v.reminderCategory === "visited" ? <CheckCircle2 size={13} style={{ color: "#059669" }} /> :
+                       <Clock size={13} />}
                       <strong>{v.visitTime || "11:00 AM"}</strong>
                     </div>
-                    <span className={`sv-status-pill ${getStatusBadgeClass(v.status)}`}>
-                      {v.status || "Scheduled"}
+                    <span className={`sv-status-pill ${v.statusBadgeClass || getStatusBadgeClass(v.status)}`}>
+                      {v.reminderCategory === "followup" ? (v.completed ? "Follow-Up Done" : "Follow-Up Due") :
+                       v.reminderCategory === "revisit" ? (v.completed ? "Revisit Done" : "Re-visit Scheduled") :
+                       v.reminderCategory === "booked" ? "Unit Booked" :
+                       v.reminderCategory === "visited" ? "Visited" :
+                       (v.status || "Scheduled")}
                     </span>
                   </div>
 
@@ -3265,7 +3403,8 @@ function CalendarView({ visits, onSelectDate, onSelectVisit, onCompleteVisit, cu
                     <h4 className="cal-dcard-client">{v.clientName}</h4>
                     <div className="cal-dcard-meta">
                       <span className="cal-dcard-prop"><Building2 size={12} /> {v.propertyName}</span>
-                      <span className="cal-dcard-sales"><UserRound size={12} /> {v.salesperson}</span>
+                      {v.interest && <span className="cal-dcard-prop"><Layers size={12} /> {v.interest} {v.budget ? `• ${v.budget}` : ""}</span>}
+                      {v.salesperson && <span className="cal-dcard-sales"><UserRound size={12} /> {v.salesperson}</span>}
                     </div>
                     {v.notes && <p className="cal-dcard-notes">"{v.notes}"</p>}
                     {v.feedback && <p className="cal-dcard-feedback"><strong>Feedback:</strong> {v.feedback}</p>}
@@ -3277,26 +3416,131 @@ function CalendarView({ visits, onSelectDate, onSelectVisit, onCompleteVisit, cu
                         <Phone size={13} /> Call
                       </a>
                       <a href={waUrl} target="_blank" rel="noopener noreferrer" className="btn-wa-mini" title={`WhatsApp ${v.clientName}`}>
-                        <PhoneCall size={13} /> WhatsApp
+                        <WhatsAppIcon size={13} /> WhatsApp
                       </a>
                     </div>
                     <div className="cal-dcard-manage">
-                      {v.status !== "Completed" && (
-                        <button
-                          type="button"
-                          className="btn-mark-complete-mini"
-                          onClick={() => onCompleteVisit ? onCompleteVisit(v) : (onSelectVisit && onSelectVisit(v))}
-                        >
-                          <CheckCircle2 size={13} /> Complete
-                        </button>
+                      {v.sourceType === "visited-client" ? (
+                        <>
+                          {v.reminderCategory === "followup" && (
+                            <>
+                              {!v.completed ? (
+                                <button
+                                  type="button"
+                                  className="btn-mark-complete-mini"
+                                  onClick={() => onUpdateVisit && onUpdateVisit(v.sourceVisit.id, {
+                                    followUpCompleted: true,
+                                    remarks: v.notes ? `${v.notes} (Follow-up done on ${selectedIsoDate})` : `Follow-up done on ${selectedIsoDate}`
+                                  })}
+                                  title="Mark follow-up completed"
+                                >
+                                  <CheckCircle2 size={13} /> Complete
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="btn-reopen-mini"
+                                  onClick={() => onUpdateVisit && onUpdateVisit(v.sourceVisit.id, { followUpCompleted: false })}
+                                  title="Reopen follow-up"
+                                >
+                                  Reopen
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                className="btn-resched-mini"
+                                onClick={() => onOpenReminderModal && onOpenReminderModal(v.sourceVisit, "followup", v.visitDate)}
+                                title="Reschedule follow-up"
+                              >
+                                <Clock size={13} /> Reschedule
+                              </button>
+                            </>
+                          )}
+
+                          {v.reminderCategory === "revisit" && (
+                            <>
+                              {!v.completed ? (
+                                <button
+                                  type="button"
+                                  className="btn-mark-complete-mini"
+                                  onClick={() => onUpdateVisit && onUpdateVisit(v.sourceVisit.id, {
+                                    revisitCompleted: true,
+                                    remarks: v.notes ? `${v.notes} (Revisit done on ${selectedIsoDate})` : `Revisit done on ${selectedIsoDate}`
+                                  })}
+                                  title="Mark revisit completed"
+                                >
+                                  <CheckCircle2 size={13} /> Complete
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="btn-reopen-mini"
+                                  onClick={() => onUpdateVisit && onUpdateVisit(v.sourceVisit.id, { revisitCompleted: false })}
+                                  title="Reopen revisit"
+                                >
+                                  Reopen
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                className="btn-resched-mini"
+                                onClick={() => onOpenReminderModal && onOpenReminderModal(v.sourceVisit, "revisit", v.visitDate)}
+                                title="Reschedule revisit"
+                              >
+                                <Clock size={13} /> Reschedule
+                              </button>
+                            </>
+                          )}
+
+                          {v.reminderCategory === "visited" && (
+                            <>
+                              <button
+                                type="button"
+                                className="btn-resched-mini"
+                                onClick={() => onOpenReminderModal && onOpenReminderModal(v.sourceVisit, "followup", selectedIsoDate)}
+                                title="Schedule follow-up"
+                              >
+                                <Bell size={11} /> Follow-up
+                              </button>
+                              <button
+                                type="button"
+                                className="btn-resched-mini"
+                                onClick={() => onOpenReminderModal && onOpenReminderModal(v.sourceVisit, "revisit", selectedIsoDate)}
+                                title="Schedule revisit"
+                              >
+                                <CalendarDays size={11} /> Revisit
+                              </button>
+                              <button
+                                type="button"
+                                className="btn-mark-complete-mini"
+                                onClick={() => onUpdateVisit && onUpdateVisit(v.sourceVisit.id, { status: "Booked" })}
+                                title="Mark booked"
+                              >
+                                <Check size={11} /> Booked
+                              </button>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          {v.status !== "Completed" && (
+                            <button
+                              type="button"
+                              className="btn-mark-complete-mini"
+                              onClick={() => onCompleteVisit ? onCompleteVisit(v.sourceSiteVisit || v) : (onSelectVisit && onSelectVisit(v.sourceSiteVisit || v))}
+                            >
+                              <CheckCircle2 size={13} /> Complete
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className="btn-resched-mini"
+                            onClick={() => onSelectVisit && onSelectVisit(v.sourceSiteVisit || v)}
+                          >
+                            <Clock size={13} /> Reschedule
+                          </button>
+                        </>
                       )}
-                      <button
-                        type="button"
-                        className="btn-resched-mini"
-                        onClick={() => onSelectVisit && onSelectVisit(v)}
-                      >
-                        <Clock size={13} /> Reschedule
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -3309,7 +3553,14 @@ function CalendarView({ visits, onSelectDate, onSelectVisit, onCompleteVisit, cu
   );
 }
 
-function SiteVisits({ siteVisits = [], onAddSiteVisit, onUpdateSiteVisit, onDeleteSiteVisit }) {
+function SiteVisits({
+  visits = [],
+  onUpdateVisit,
+  siteVisits = [],
+  onAddSiteVisit,
+  onUpdateSiteVisit,
+  onDeleteSiteVisit
+}) {
   const { currentUser, adminPropertyFilter, setAdminPropertyFilter } = useAuth();
   const isPropertyScoped = currentUser?.role === "property";
 
@@ -3323,6 +3574,66 @@ function SiteVisits({ siteVisits = [], onAddSiteVisit, onUpdateSiteVisit, onDele
   const [rescheduleVisit, setRescheduleVisit] = useState(null);
   const [completeVisit, setCompleteVisit] = useState(null);
 
+  // Client reminder modal state
+  const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
+  const [reminderModalVisit, setReminderModalVisit] = useState(null);
+  const [reminderModalType, setReminderModalType] = useState("followup");
+  const [reminderModalDate, setReminderModalDate] = useState("");
+
+  const handleOpenReminderModal = (visitObj = null, type = "followup", defaultDateStr = "") => {
+    setReminderModalVisit(visitObj);
+    setReminderModalType(type);
+    setReminderModalDate(defaultDateStr);
+    setIsReminderModalOpen(true);
+  };
+
+  const handleSaveReminder = ({ visitId, type, date, note }) => {
+    const parsed = parseLocalDate(date) || new Date();
+    const readableDate = parsed.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    });
+
+    if (type === "followup") {
+      onUpdateVisit && onUpdateVisit(visitId, {
+        followUpDate: readableDate,
+        followUpCompleted: false,
+        status: "FollowUp",
+        remarks: note || undefined
+      });
+    } else {
+      onUpdateVisit && onUpdateVisit(visitId, {
+        revisitDate: readableDate,
+        revisitCompleted: false,
+        status: "Revisited",
+        remarks: note || undefined
+      });
+    }
+  };
+
+  // 1. Scoped Visited Clients
+  const scopedVisits = useMemo(() => {
+    return visits.filter(v => {
+      if (isPropertyScoped && !matchesProperty(v.propertyName, currentUser.property)) return false;
+      if (adminPropertyFilter !== "ALL" && !matchesProperty(v.propertyName, adminPropertyFilter)) return false;
+      if (propertyFilter !== "ALL" && !matchesProperty(v.propertyName, propertyFilter)) return false;
+      if (q.trim()) {
+        const query = q.toLowerCase();
+        const match = (
+          (v.name && v.name.toLowerCase().includes(query)) ||
+          (v.phone && v.phone.includes(query)) ||
+          (v.propertyName && v.propertyName.toLowerCase().includes(query)) ||
+          (v.remarks && v.remarks.toLowerCase().includes(query)) ||
+          (v.interest && v.interest.toLowerCase().includes(query))
+        );
+        if (!match) return false;
+      }
+      return true;
+    });
+  }, [visits, isPropertyScoped, currentUser, adminPropertyFilter, propertyFilter, q]);
+
+  // 2. Scoped Site Visits (walkthrough appointments)
   const activeSiteVisits = useMemo(() => {
     return siteVisits.filter(v => {
       if (isPropertyScoped && !matchesProperty(v.propertyName, currentUser.property)) return false;
@@ -3344,6 +3655,152 @@ function SiteVisits({ siteVisits = [], onAddSiteVisit, onUpdateSiteVisit, onDele
     });
   }, [siteVisits, isPropertyScoped, currentUser, adminPropertyFilter, propertyFilter, q]);
 
+  // 3. Unified Calendar Events (Visited clients, follow-up reminders, revisits, booked deals & site walkthroughs)
+  const activeCalendarEvents = useMemo(() => {
+    const events = [];
+
+    // Process Visited Clients from visits
+    scopedVisits.forEach((v) => {
+      const vProp = v.propertyName || "Park Solitaire";
+      const vDateIso = toLocalYMD(v.date);
+      const fuDateIso = v.followUpDate ? toLocalYMD(v.followUpDate) : null;
+      const revDateIso = v.revisitDate ? toLocalYMD(v.revisitDate) : null;
+      const detectedRem = detectReminderFromRemark(v.remarks);
+
+      // a) Follow-Up Reminder
+      const hasFollowUp = Boolean(v.followUpDate) || (v.status || "").toLowerCase().includes("follow") || detectedRem === "followup";
+      if (hasFollowUp) {
+        const targetDate = fuDateIso || vDateIso;
+        if (targetDate) {
+          events.push({
+            id: `fu-${v.id}`,
+            sourceType: "visited-client",
+            sourceVisit: v,
+            clientName: v.name,
+            phone: v.phone,
+            propertyName: vProp,
+            visitDate: targetDate,
+            visitTime: "Follow-Up Reminder",
+            reminderCategory: "followup",
+            status: v.followUpCompleted ? "Completed" : "Scheduled",
+            statusBadgeClass: "status-followup",
+            displayTitle: `Follow-Up: ${v.name}`,
+            notes: v.remarks,
+            interest: v.interest,
+            budget: v.budget,
+            profession: v.profession,
+            salesperson: v.salesperson || "Property Sales Desk",
+            completed: Boolean(v.followUpCompleted)
+          });
+        }
+      }
+
+      // b) Re-visit Reminder
+      const hasRevisit = Boolean(v.revisitDate) || (v.status || "").toLowerCase().includes("revisit") || detectedRem === "revisit";
+      if (hasRevisit) {
+        const targetDate = revDateIso || vDateIso;
+        if (targetDate) {
+          events.push({
+            id: `rev-${v.id}`,
+            sourceType: "visited-client",
+            sourceVisit: v,
+            clientName: v.name,
+            phone: v.phone,
+            propertyName: vProp,
+            visitDate: targetDate,
+            visitTime: "Client Re-visit",
+            reminderCategory: "revisit",
+            status: v.revisitCompleted ? "Completed" : "Scheduled",
+            statusBadgeClass: "status-revisited",
+            displayTitle: `Re-visit: ${v.name}`,
+            notes: v.remarks,
+            interest: v.interest,
+            budget: v.budget,
+            profession: v.profession,
+            salesperson: v.salesperson || "Property Sales Desk",
+            completed: Boolean(v.revisitCompleted)
+          });
+        }
+      }
+
+      // c) Booked Milestone
+      const isBooked = (v.status || "").toLowerCase().includes("book") || (v.status || "").toLowerCase().includes("close");
+      if (isBooked && vDateIso) {
+        events.push({
+          id: `book-${v.id}`,
+          sourceType: "visited-client",
+          sourceVisit: v,
+          clientName: v.name,
+          phone: v.phone,
+          propertyName: vProp,
+          visitDate: vDateIso,
+          visitTime: "Unit Booked",
+          reminderCategory: "booked",
+          status: "Booked",
+          statusBadgeClass: "status-booked",
+          displayTitle: `Booked: ${v.name}`,
+          notes: v.remarks,
+          interest: v.interest,
+          budget: v.budget,
+          profession: v.profession,
+          salesperson: v.salesperson || "Property Sales Desk",
+          completed: true
+        });
+      }
+
+      // d) Initial Walkthrough / Visit (recorded on date of visit if not already booked)
+      if (!isBooked && vDateIso && vDateIso !== fuDateIso && vDateIso !== revDateIso) {
+        events.push({
+          id: `vis-${v.id}`,
+          sourceType: "visited-client",
+          sourceVisit: v,
+          clientName: v.name,
+          phone: v.phone,
+          propertyName: vProp,
+          visitDate: vDateIso,
+          visitTime: "Walkthrough",
+          reminderCategory: "visited",
+          status: v.status || "Visited",
+          statusBadgeClass: "status-visited",
+          displayTitle: `Visited: ${v.name}`,
+          notes: v.remarks,
+          interest: v.interest,
+          budget: v.budget,
+          profession: v.profession,
+          salesperson: v.salesperson || "Property Sales Desk",
+          completed: true
+        });
+      }
+    });
+
+    // Process Site Visits (on-ground walkthrough appointments)
+    activeSiteVisits.forEach((sv) => {
+      const svDate = toLocalYMD(sv.visitDate);
+      if (svDate) {
+        events.push({
+          id: `sv-${sv.id}`,
+          sourceType: "site-visit",
+          sourceSiteVisit: sv,
+          clientName: sv.clientName,
+          phone: sv.phone,
+          propertyName: sv.propertyName,
+          visitDate: svDate,
+          visitTime: sv.visitTime || "11:00 AM",
+          reminderCategory: "walkthrough",
+          status: sv.status || "Scheduled",
+          statusBadgeClass: getStatusBadgeClass(sv.status),
+          displayTitle: sv.clientName,
+          notes: sv.notes,
+          feedback: sv.feedback,
+          salesperson: sv.salesperson,
+          completed: (sv.status || "").toLowerCase() === "completed"
+        });
+      }
+    });
+
+    return events;
+  }, [scopedVisits, activeSiteVisits]);
+
   const upcomingVisits = useMemo(() => {
     return activeSiteVisits
       .filter(v => ["scheduled", "confirmed", "rescheduled"].includes((v.status || "").toLowerCase()))
@@ -3364,10 +3821,10 @@ function SiteVisits({ siteVisits = [], onAddSiteVisit, onUpdateSiteVisit, onDele
       });
   }, [activeSiteVisits]);
 
-  const totalCount = activeSiteVisits.length;
-  const todayVisitsCount = activeSiteVisits.filter(v => isSameDay(v.visitDate, 0)).length;
-  const completedCount = completedVisits.length;
-  const rescheduledCount = activeSiteVisits.filter(v => (v.status || "").toLowerCase() === "rescheduled").length;
+  const totalCount = activeCalendarEvents.length;
+  const todayVisitsCount = activeCalendarEvents.filter(v => isSameDay(v.visitDate, 0)).length;
+  const completedCount = activeCalendarEvents.filter(v => v.completed).length;
+  const rescheduledCount = activeCalendarEvents.filter(v => (v.status || "").toLowerCase() === "rescheduled" || (v.reminderCategory === "followup" && !v.completed)).length;
 
   const handleOpenScheduleForDate = (isoDate) => {
     setSelectedDateForNew(isoDate);
@@ -3520,10 +3977,12 @@ function SiteVisits({ siteVisits = [], onAddSiteVisit, onUpdateSiteVisit, onDele
 
       {activeTab === "calendar" && (
         <CalendarView
-          visits={activeSiteVisits}
+          visits={activeCalendarEvents}
           onSelectDate={handleOpenScheduleForDate}
-          onSelectVisit={(v) => setRescheduleVisit(v)}
-          onCompleteVisit={(v) => setCompleteVisit(v)}
+          onSelectVisit={(v) => setRescheduleVisit(v.sourceSiteVisit || v)}
+          onCompleteVisit={(v) => setCompleteVisit(v.sourceSiteVisit || v)}
+          onUpdateVisit={onUpdateVisit}
+          onOpenReminderModal={handleOpenReminderModal}
           currentMonth={currentMonth}
           setCurrentMonth={setCurrentMonth}
         />
@@ -3849,6 +4308,19 @@ function SiteVisits({ siteVisits = [], onAddSiteVisit, onUpdateSiteVisit, onDele
           onUpdateSiteVisit(id, updates);
           setCompleteVisit(null);
         }}
+      />
+
+      <ScheduleReminderModal
+        visits={scopedVisits}
+        initialVisit={reminderModalVisit}
+        isOpen={isReminderModalOpen}
+        onClose={() => {
+          setIsReminderModalOpen(false);
+          setReminderModalVisit(null);
+        }}
+        onSave={handleSaveReminder}
+        defaultDate={reminderModalDate}
+        defaultType={reminderModalType}
       />
     </Layout>
   );
@@ -5517,6 +5989,21 @@ function AppContent() {
         path="/site-visits"
         element={
           <SiteVisits
+            visits={visits}
+            onUpdateVisit={updateVisit}
+            siteVisits={siteVisits}
+            onAddSiteVisit={addSiteVisit}
+            onUpdateSiteVisit={updateSiteVisit}
+            onDeleteSiteVisit={deleteSiteVisit}
+          />
+        }
+      />
+      <Route
+        path="/calendar"
+        element={
+          <SiteVisits
+            visits={visits}
+            onUpdateVisit={updateVisit}
             siteVisits={siteVisits}
             onAddSiteVisit={addSiteVisit}
             onUpdateSiteVisit={updateSiteVisit}
