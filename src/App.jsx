@@ -1980,11 +1980,6 @@ function Dashboard({ visits, onUpdateVisit, siteVisits = [] }) {
             <span>{formattedToday}</span>
           </div>
         </div>
-        {isPropertyScoped && (
-          <p className="hero-subtitle">
-            Exclusive client pipeline, walkthrough tracking, and records for {currentUser?.property || "this property"}
-          </p>
-        )}
       </div>
 
       <div className="hero-actions">
@@ -3104,7 +3099,6 @@ function CalendarView({
                 {currentMonthVisitsCount} {currentMonthVisitsCount === 1 ? "Event & Reminder" : "Events & Reminders"}
               </span>
             </div>
-            <p className="cal-subtitle">Visited client pipeline, follow-up calls, revisits, booked deals & walkthroughs</p>
           </div>
         </div>
 
