@@ -336,21 +336,26 @@ describe('Park Solitaire Client Visit App', () => {
       });
     });
 
-    it('filters visits by status pills (Visited, FollowUp, Revisited, Booked, Closed)', () => {
+    it('verifies status pills (Visited, FollowUp, Booked, etc.) are removed from admin All Visits menu and filters by aspiration', () => {
       render(
         <MemoryRouter initialEntries={['/visits']}>
           <App />
         </MemoryRouter>
       );
 
-      // Click "Booked" filter pill
-      const bookedFilterBtn = screen.getByRole('button', { name: 'Booked' });
-      fireEvent.click(bookedFilterBtn);
+      // Status filter pills like Visited, FollowUp, Revisited, Booked, Closed are removed for admin
+      expect(screen.queryByRole('button', { name: 'Visited' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'FollowUp' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Booked' })).not.toBeInTheDocument();
 
-      // Sneha Reddy and Rajesh Khanna are Booked in seedVisits
-      expect(screen.getByText('Sneha Reddy')).toBeInTheDocument();
-      expect(screen.getByText('Rajesh Khanna')).toBeInTheDocument();
-      // Rahul Sharma is Visited, so should not be in filtered list
+      // Click "Investment" filter pill
+      const investmentFilterBtn = screen.getByRole('button', { name: 'Investment' });
+      fireEvent.click(investmentFilterBtn);
+
+      // Priya Patel and Amit Verma are Investment in seedVisits
+      expect(screen.getByText('Priya Patel')).toBeInTheDocument();
+      expect(screen.getByText('Amit Verma')).toBeInTheDocument();
+      // Rahul Sharma is Personal Use, so should not be in filtered list
       expect(screen.queryByText('Rahul Sharma')).not.toBeInTheDocument();
     });
   });
@@ -924,33 +929,15 @@ describe('Park Solitaire Client Visit App', () => {
       expect(screen.queryByText('Rahul Sharma')).not.toBeInTheDocument();
     });
 
-    it('allows adding and editing client records on the Clients screen', async () => {
+    it('verifies Add Client option is removed for admin and allows editing client records on Clients screen', async () => {
       render(
         <MemoryRouter initialEntries={['/clients']}>
           <App />
         </MemoryRouter>
       );
 
-      // 1. Open Add Client modal
-      const addClientBtn = screen.getByRole('button', { name: /add client/i });
-      expect(addClientBtn).toBeInTheDocument();
-      fireEvent.click(addClientBtn);
-
-      expect(screen.getByRole('heading', { level: 3, name: 'Add New Client' })).toBeInTheDocument();
-
-      // Fill in new client details
-      const nameInput = screen.getByPlaceholderText(/e\.g\. Ramesh Kulkarni/i);
-      const phoneInput = screen.getByPlaceholderText(/10-digit number/i);
-      fireEvent.change(nameInput, { target: { value: 'Kailash Singhania' } });
-      fireEvent.change(phoneInput, { target: { value: '9822233344' } });
-
-      const submitAddBtn = screen.getByRole('button', { name: /Add Client Record/i });
-      fireEvent.click(submitAddBtn);
-
-      // Client should now appear in client directory
-      await waitFor(() => {
-        expect(screen.getByText('Kailash Singhania')).toBeInTheDocument();
-      });
+      // 1. Verify Add Client button is removed for Admin
+      expect(screen.queryByRole('button', { name: /add client/i })).not.toBeInTheDocument();
 
       // 2. Click Edit on Rahul Sharma
       const editButtons = screen.getAllByRole('button', { name: /edit/i });

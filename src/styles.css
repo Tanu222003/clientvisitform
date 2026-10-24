@@ -6593,14 +6593,7 @@ tbody tr:hover td.sticky-cell {
   flex-wrap: wrap;
 }
 
-.sv-property-pills,
-.clients-prop-filter-bar .prop-filter-chips {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
+.all-visits-prop-bar,
 .clients-prop-filter-bar {
   display: flex;
   align-items: center;
@@ -6610,7 +6603,53 @@ tbody tr:hover td.sticky-cell {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   flex-wrap: wrap;
+}
+
+.all-visits-prop-bar .prop-filter-label,
+.clients-prop-filter-bar .prop-filter-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.all-visits-prop-bar .prop-filter-chips,
+.clients-prop-filter-bar .prop-filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.prop-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.prop-chip:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.prop-chip.active {
+  background: #102644;
+  color: #ffffff;
+  border-color: #102644;
+  box-shadow: 0 2px 6px rgba(16, 38, 68, 0.25);
 }
 
 .sv-prop-pill {

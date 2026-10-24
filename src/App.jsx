@@ -975,20 +975,7 @@ function Layout({children}) {
                 <Building2 size={14} />
                 <span>{currentUser.property} Desk</span>
               </span>
-            ) : (
-              <div
-                className="topbar-admin-scope-pill"
-                onClick={() => setUserMenuOpen(prev => !prev)}
-                title="Click to switch portfolio view"
-              >
-                <ShieldCheck size={14} className="topbar-shield-icon" />
-                <span className="scope-portfolio-label">Portfolio:</span>
-                <span className="scope-val-text">
-                  {adminPropertyFilter === "ALL" ? "All Properties (Unified)" : adminPropertyFilter}
-                </span>
-                <ChevronDown size={13} />
-              </div>
-            )}
+            ) : null}
           </div>
 
           <div className="topbar-spacer"/>
@@ -1957,14 +1944,12 @@ function Dashboard({ visits, onUpdateVisit, siteVisits = [] }) {
     {/* 1. Executive Dashboard Hero Header without property logos */}
     <div className="dashboard-hero">
       <div className="hero-content">
-        <div className="hero-badge">
-          <Sparkles size={13} className="hero-badge-sparkle" />
-          <span>
-            {isPropertyScoped
-              ? `${currentUser?.property || "Property"} Sales Desk • Operations`
-              : (adminPropertyFilter && adminPropertyFilter !== "ALL" ? `${adminPropertyFilter} • Filtered View` : "Central CRM Command • Operations Overview")}
-          </span>
-        </div>
+        {isPropertyScoped && (
+          <div className="hero-badge">
+            <Sparkles size={13} className="hero-badge-sparkle" />
+            <span>{`${currentUser?.property || "Property"} Sales Desk • Operations`}</span>
+          </div>
+        )}
         <div className="hero-title-row">
           <h1 aria-label="Dashboard">
             {isPropertyScoped
@@ -3899,19 +3884,25 @@ function AllVisits({ visits, onUpdateVisit }) {
 
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState("All");
-  const filters = [
-    "All",
-    "Visited",
-    "FollowUp",
-    "Revisited",
-    "Booked",
-    "Closed",
-    "Personal Use",
-    "Investment",
-    "1BHK",
-    "2BHK",
-    "3BHK"
-  ];
+  const statusFilters = ["Visited", "FollowUp", "Revisited", "Booked", "Closed"];
+  const filters = isPropertyScoped
+    ? [
+        "All",
+        ...statusFilters,
+        "Personal Use",
+        "Investment",
+        "1BHK",
+        "2BHK",
+        "3BHK"
+      ]
+    : [
+        "All",
+        "Personal Use",
+        "Investment",
+        "1BHK",
+        "2BHK",
+        "3BHK"
+      ];
   const filtered = activeVisits.filter((v) => {
     const text = Object.values(v).join(" ").toLowerCase();
     const match = text.includes(q.toLowerCase());
@@ -3920,7 +3911,7 @@ function AllVisits({ visits, onUpdateVisit }) {
       ok = v.aspiration === filter;
     if (["1BHK", "2BHK", "3BHK"].includes(filter))
       ok = v.interest.includes(filter);
-    if (["Visited", "FollowUp", "Revisited", "Booked", "Closed"].includes(filter)) {
+    if (statusFilters.includes(filter)) {
       ok = (v.status || "").toLowerCase().replace(/[^a-z]/g, "") === filter.toLowerCase().replace(/[^a-z]/g, "");
     }
     return match && ok;
@@ -3945,7 +3936,7 @@ function AllVisits({ visits, onUpdateVisit }) {
       {/* Admin Portfolio Property Filter Bar */}
       {!isPropertyScoped && (
         <div className="all-visits-prop-bar">
-          <span className="prop-filter-label"><Layers size={13} /> Property Filter:</span>
+          <span className="prop-filter-label"><Layers size={14} /> Property:</span>
           <div className="prop-filter-chips">
             <button
               type="button"
@@ -3955,7 +3946,7 @@ function AllVisits({ visits, onUpdateVisit }) {
               All Properties ({visits.length})
             </button>
             {AVAILABLE_PROPERTIES.map(p => {
-              const count = visits.filter(v => (v.propertyName || "Park Solitaire") === p.name).length;
+              const count = visits.filter(v => matchesProperty(v.propertyName, p.name)).length;
               return (
                 <button
                   type="button"
@@ -5182,9 +5173,11 @@ function Clients({ visits, onUpdateVisit, onAddVisit }) {
         <button className="btn secondary" onClick={() => exportClientsCSV(clients)}>
           <Download size={14} /> Export
         </button>
-        <button className="btn primary" onClick={() => setIsAddOpen(true)}>
-          <Plus size={14} /> Add Client
-        </button>
+        {isPropertyScoped && (
+          <button className="btn primary" onClick={() => setIsAddOpen(true)}>
+            <Plus size={14} /> Add Client
+          </button>
+        )}
       </PageHead>
 
       {/* Admin Portfolio Property Filter Bar */}
