@@ -742,7 +742,7 @@ describe('Park Solitaire Client Visit App', () => {
       expect(screen.getByRole('button', { name: /Master Admin Command/i })).toBeInTheDocument();
 
       // Verify the 4 properties are present
-      expect(screen.getByText('Mudita')).toBeInTheDocument();
+      expect(screen.getByText('Park Solitaire Lifespaces LLP')).toBeInTheDocument();
       expect(screen.getByText('Veena Developer Pvt LTD')).toBeInTheDocument();
       expect(screen.getByText('Luxury Empire')).toBeInTheDocument();
       expect(screen.getByText('Other')).toBeInTheDocument();
@@ -1131,7 +1131,7 @@ describe('Park Solitaire Client Visit App', () => {
   });
 
   describe('Property Dedicated Logos & Brand Isolation', () => {
-    it('renders dedicated logos for Veena Developer Pvt LTD, Luxury Empire, and Mudita on /login cards', () => {
+    it('renders dedicated logos for Veena Developer Pvt LTD, Luxury Empire, and Park Solitaire Lifespaces LLP on /login cards', () => {
       render(
         <MemoryRouter initialEntries={['/login']}>
           <App />
@@ -1147,9 +1147,9 @@ describe('Park Solitaire Client Visit App', () => {
       expect(luxuryLogo).toBeInTheDocument();
       expect(luxuryLogo).toHaveAttribute('src', expect.stringContaining('luxury-empire-logo'));
 
-      const muditaLogo = screen.getByAltText('Mudita');
-      expect(muditaLogo).toBeInTheDocument();
-      expect(muditaLogo).toHaveAttribute('src', expect.stringContaining('mudita-logo'));
+      const psLogo = screen.getByAltText('Park Solitaire Lifespaces LLP');
+      expect(psLogo).toBeInTheDocument();
+      expect(psLogo).toHaveAttribute('src', expect.stringContaining('logo'));
     });
 
     it('displays Veena Developer logo when logged into Veena Developer Sales Desk', () => {

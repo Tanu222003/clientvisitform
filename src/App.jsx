@@ -79,16 +79,16 @@ function isTodayOrYesterday(dateStr) {
 
 export const AVAILABLE_PROPERTIES = [
   {
-    id: "mudita",
-    name: "Mudita",
-    shortName: "Mudita",
+    id: "park-solitaire",
+    name: "Park Solitaire Lifespaces LLP",
+    shortName: "Park Solitaire",
     category: "Residential",
-    tagline: "Builders and Developers",
-    location: "Mumbai",
+    tagline: "Signature Luxury Residences",
+    location: "Andheri West, Mumbai",
     accentColor: "#c29135",
     badgeClass: "badge-gold",
     units: ["1BHK", "2BHK", "3BHK", "2BHK Jodi"],
-    logo: muditaLogoImg
+    logo: logoImg
   },
   {
     id: "veena-developer",
@@ -131,7 +131,7 @@ export const AVAILABLE_PROPERTIES = [
 
 export function matchesProperty(itemProp, filterProp) {
   if (!filterProp || filterProp === "ALL" || filterProp === "All Properties" || filterProp === "All") return true;
-  const ip = (itemProp && String(itemProp).trim() ? String(itemProp).trim() : "Mudita").toLowerCase();
+  const ip = (itemProp && String(itemProp).trim() ? String(itemProp).trim() : "Park Solitaire").toLowerCase();
   const fp = String(filterProp).trim().toLowerCase();
   if (ip === fp) return true;
   if (fp === "all" || fp === "all properties") return true;
@@ -139,7 +139,9 @@ export function matchesProperty(itemProp, filterProp) {
   const isVdplItem = ip === "vdpl" || ip.includes("veena developer") || ip.includes("vdpl");
   const isVdplFilter = fp === "vdpl" || fp.includes("veena developer") || fp.includes("vdpl");
   if (isVdplItem && isVdplFilter) return true;
-  if ((ip.includes("park solitaire") || ip.includes("mudita")) && (fp.includes("park solitaire") || fp.includes("mudita"))) return true;
+  const isParkItem = ip.includes("park solitaire") || ip.includes("solitaire") || ip.includes("lifespaces") || ip.includes("mudita");
+  const isParkFilter = fp.includes("park solitaire") || fp.includes("solitaire") || fp.includes("lifespaces") || fp.includes("mudita");
+  if (isParkItem && isParkFilter) return true;
   if (ip.includes("luxury empire") && fp.includes("luxury empire")) return true;
   return false;
 }
@@ -673,8 +675,8 @@ export function getPropertyLogo(propertyName) {
   const p = AVAILABLE_PROPERTIES.find(item => matchesProperty(item.name, propertyName));
   if (p && p.logo) return p.logo;
   const lower = String(propertyName).toLowerCase();
+  if (lower.includes("solitaire") || lower.includes("park") || lower.includes("lifespaces")) return logoImg;
   if (lower.includes("mudita")) return muditaLogoImg;
-  if (lower.includes("solitaire") || lower.includes("park")) return logoImg;
   if (lower.includes("veena") || lower.includes("vdpl")) return vdplLogoImg;
   if (lower.includes("luxury") || lower.includes("empire")) return luxuryLogoImg;
   return null;
@@ -682,20 +684,22 @@ export function getPropertyLogo(propertyName) {
 
 function PropertyBrand({ propertyName, subtitle }) {
   const logo = getPropertyLogo(propertyName);
-  const displayName = propertyName || "Mudita";
-  const defaultSub = displayName === "Mudita" ? "Builders and Developers" : (displayName === "Park Solitaire" ? "Lifespaces LLP" : "Sales Desk");
+  const displayName = propertyName || "Park Solitaire";
+  const isPark = displayName.toLowerCase().includes("park solitaire") || displayName.toLowerCase().includes("solitaire") || displayName.toLowerCase().includes("lifespaces");
+  const defaultSub = isPark ? "Lifespaces LLP" : (displayName === "Mudita" ? "Builders and Developers" : "Sales Desk");
   const finalSub = subtitle || defaultSub;
+  const brandTitle = isPark ? "Park Solitaire" : displayName;
   return (
     <div className="brand property-brand-wrapper">
       {logo ? (
-        <img src={logo} alt={displayName} className="brand-logo property-img-logo" />
+        <img src={logo} alt={brandTitle} className="brand-logo property-img-logo" />
       ) : (
         <div className="admin-brand-icon-box" style={{ width: 36, height: 36 }}>
           <Building2 size={18} />
         </div>
       )}
       <div>
-        <div className="brand-name">{displayName}</div>
+        <div className="brand-name">{brandTitle}</div>
         <div className="brand-sub">{finalSub}</div>
       </div>
     </div>
@@ -704,10 +708,10 @@ function PropertyBrand({ propertyName, subtitle }) {
 
 function LoginScreen({ onLogin }) {
   const [tab, setTab] = useState("property");
-  const [selectedProperty, setSelectedProperty] = useState("Mudita");
+  const [selectedProperty, setSelectedProperty] = useState("Park Solitaire Lifespaces LLP");
   const [customPropertyName, setCustomPropertyName] = useState("");
   const [deskName, setDeskName] = useState("Sales Desk");
-  const [pin, setPin] = useState("mudita123");
+  const [pin, setPin] = useState("solitaire123");
   const [adminUser, setAdminUser] = useState("admin");
   const [adminPass, setAdminPass] = useState("admin123");
   const [error, setError] = useState("");
@@ -744,7 +748,7 @@ function LoginScreen({ onLogin }) {
 
   const activeDisplayProp = (selectedProperty === "Other" && customPropertyName.trim())
     ? customPropertyName.trim()
-    : selectedProperty;
+    : (selectedProperty === "Park Solitaire Lifespaces LLP" ? "Park Solitaire" : selectedProperty);
 
   return (
     <div className="login-portal-page">
@@ -789,7 +793,14 @@ function LoginScreen({ onLogin }) {
                   <div
                     key={p.name}
                     className={"login-prop-card " + (selectedProperty === p.name ? "active" : "")}
-                    onClick={() => setSelectedProperty(p.name)}
+                    onClick={() => {
+                      setSelectedProperty(p.name);
+                      const lower = p.name.toLowerCase();
+                      if (lower.includes("veena")) setPin("veena123");
+                      else if (lower.includes("luxury")) setPin("luxury123");
+                      else if (lower.includes("other")) setPin("desk123");
+                      else setPin("solitaire123");
+                    }}
                   >
                     <div className="login-prop-card-head">
                       {p.logo ? (
@@ -840,7 +851,15 @@ function LoginScreen({ onLogin }) {
                   type="password"
                   value={pin}
                   onChange={e => setPin(e.target.value)}
-                  placeholder="PIN (mudita123)"
+                  placeholder={
+                    selectedProperty.toLowerCase().includes("veena")
+                      ? "PIN (veena123)"
+                      : selectedProperty.toLowerCase().includes("luxury")
+                        ? "PIN (luxury123)"
+                        : selectedProperty === "Other"
+                          ? "PIN (desk123)"
+                          : "PIN (solitaire123)"
+                  }
                 />
               </div>
             </div>
