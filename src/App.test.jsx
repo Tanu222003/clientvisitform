@@ -1076,25 +1076,18 @@ describe('Park Solitaire Client Visit App', () => {
       expect(screen.getByText('Sat')).toBeInTheDocument();
     });
 
-    it('renders single canonical schedule site visit button and opens schedule modal', () => {
+    it('removes schedule site visit and set client reminder in admin, and allows them for property desk', () => {
+      // 1. In Master Admin
       render(
         <MemoryRouter initialEntries={['/site-visits']}>
           <App />
         </MemoryRouter>
       );
 
-      // Verify Schedule Site Visit button is rendered once as the primary action
-      const scheduleBtns = screen.getAllByRole('button', { name: /Schedule Site Visit/i });
-      expect(scheduleBtns.length).toBe(1);
-
-      // Verify Day Inspector has client reminder action
-      expect(screen.getByRole('button', { name: /Set Client Reminder/i })).toBeInTheDocument();
-
-      // Click the single schedule site visit button
-      fireEvent.click(scheduleBtns[0]);
-
-      // Modal opens
-      expect(screen.getByRole('heading', { level: 3, name: 'Schedule Site Visit' })).toBeInTheDocument();
+      // Verify Schedule Site Visit, Schedule Visit on this Date, and Set Client Reminder are NOT in admin
+      expect(screen.queryByRole('button', { name: /Schedule Site Visit/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /Schedule Visit on this Date/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /Set Client Reminder/i })).not.toBeInTheDocument();
     });
   });
 
@@ -1260,13 +1253,13 @@ describe('Park Solitaire Client Visit App', () => {
       expect(waButtons[0]).toHaveAttribute('href', expect.stringContaining('wa.me'));
     });
 
-    it('allows opening client reminder modal from calendar day panel', () => {
+    it('allows opening client reminder modal from calendar day panel for property sales desk', () => {
       localStorage.setItem("ps_current_user_v3", JSON.stringify({
-        id: "admin",
-        role: "admin",
-        name: "Master Admin",
-        email: "admin@parksolitaire.com",
-        property: "ALL"
+        id: "park-desk",
+        role: "property",
+        name: "Park Solitaire Desk",
+        email: "desk@parksolitaire.com",
+        property: "Park Solitaire"
       }));
 
       render(
@@ -1274,6 +1267,10 @@ describe('Park Solitaire Client Visit App', () => {
           <App />
         </MemoryRouter>
       );
+
+      // Verify Schedule Site Visit is available for property desk
+      const scheduleBtn = screen.getByRole('button', { name: /Schedule Site Visit/i });
+      expect(scheduleBtn).toBeInTheDocument();
 
       // Click Set Client Reminder button in day panel
       const setRemBtn = screen.getByRole('button', { name: /Set Client Reminder/i });

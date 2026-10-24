@@ -2926,6 +2926,7 @@ function CalendarView({
   currentMonth,
   setCurrentMonth
 }) {
+  const { isAdmin } = useAuth();
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
 
@@ -3235,13 +3236,15 @@ function CalendarView({
           </div>
 
           <div className="cal-day-panel-actions">
-            <button
-              type="button"
-              className="btn primary btn-add-reminder-day"
-              onClick={() => onOpenReminderModal && onOpenReminderModal(null, "followup", selectedIsoDate)}
-            >
-              <Bell size={13} /> Set Client Reminder
-            </button>
+            {!isAdmin && (
+              <button
+                type="button"
+                className="btn primary btn-add-reminder-day"
+                onClick={() => onOpenReminderModal && onOpenReminderModal(null, "followup", selectedIsoDate)}
+              >
+                <Bell size={13} /> Set Client Reminder
+              </button>
+            )}
           </div>
         </div>
 
@@ -3249,15 +3252,17 @@ function CalendarView({
           <div className="cal-day-empty-state">
             <CalendarDays size={24} />
             <p>No site visits or client reminders scheduled for this date.</p>
-            <div className="cal-day-empty-actions">
-              <button
-                type="button"
-                className="btn secondary btn-sm"
-                onClick={() => onOpenReminderModal && onOpenReminderModal(null, "followup", selectedIsoDate)}
-              >
-                <Bell size={12} /> Set Client Reminder
-              </button>
-            </div>
+            {!isAdmin && (
+              <div className="cal-day-empty-actions">
+                <button
+                  type="button"
+                  className="btn secondary btn-sm"
+                  onClick={() => onOpenReminderModal && onOpenReminderModal(null, "followup", selectedIsoDate)}
+                >
+                  <Bell size={12} /> Set Client Reminder
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="cal-day-visits-grid">
@@ -3390,22 +3395,26 @@ function CalendarView({
 
                           {v.reminderCategory === "visited" && (
                             <>
-                              <button
-                                type="button"
-                                className="btn-resched-mini"
-                                onClick={() => onOpenReminderModal && onOpenReminderModal(v.sourceVisit, "followup", selectedIsoDate)}
-                                title="Schedule follow-up"
-                              >
-                                <Bell size={11} /> Follow-up
-                              </button>
-                              <button
-                                type="button"
-                                className="btn-resched-mini"
-                                onClick={() => onOpenReminderModal && onOpenReminderModal(v.sourceVisit, "revisit", selectedIsoDate)}
-                                title="Schedule revisit"
-                              >
-                                <CalendarDays size={11} /> Revisit
-                              </button>
+                              {!isAdmin && (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="btn-resched-mini"
+                                    onClick={() => onOpenReminderModal && onOpenReminderModal(v.sourceVisit, "followup", selectedIsoDate)}
+                                    title="Schedule follow-up"
+                                  >
+                                    <Bell size={11} /> Follow-up
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="btn-resched-mini"
+                                    onClick={() => onOpenReminderModal && onOpenReminderModal(v.sourceVisit, "revisit", selectedIsoDate)}
+                                    title="Schedule revisit"
+                                  >
+                                    <CalendarDays size={11} /> Revisit
+                                  </button>
+                                </>
+                              )}
                               <button
                                 type="button"
                                 className="btn-mark-complete-mini"
@@ -3457,7 +3466,7 @@ function SiteVisits({
   onUpdateSiteVisit,
   onDeleteSiteVisit
 }) {
-  const { currentUser, adminPropertyFilter, setAdminPropertyFilter } = useAuth();
+  const { currentUser, adminPropertyFilter, setAdminPropertyFilter, isAdmin } = useAuth();
   const isPropertyScoped = currentUser?.role === "property";
 
   const [activeTab, setActiveTab] = useState("calendar");
@@ -3723,6 +3732,7 @@ function SiteVisits({
   const rescheduledCount = activeCalendarEvents.filter(v => (v.status || "").toLowerCase() === "rescheduled" || (v.reminderCategory === "followup" && !v.completed)).length;
 
   const handleOpenScheduleForDate = (isoDate) => {
+    if (isAdmin) return;
     setSelectedDateForNew(isoDate);
     setIsScheduleOpen(true);
   };
@@ -3747,9 +3757,11 @@ function SiteVisits({
         <button className="btn secondary" onClick={() => exportSiteVisitsCSV(activeSiteVisits)}>
           <Download size={14} /> Export Visits
         </button>
-        <button className="btn primary" onClick={() => { setSelectedDateForNew(""); setIsScheduleOpen(true); }}>
-          <Plus size={14} /> Schedule Site Visit
-        </button>
+        {!isAdmin && (
+          <button className="btn primary" onClick={() => { setSelectedDateForNew(""); setIsScheduleOpen(true); }}>
+            <Plus size={14} /> Schedule Site Visit
+          </button>
+        )}
       </PageHead>
 
       <div className="site-visits-metric-cards">
@@ -4169,15 +4181,17 @@ function SiteVisits({
         </section>
       )}
 
-      <ScheduleSiteVisitModal
-        isOpen={isScheduleOpen}
-        defaultDate={selectedDateForNew}
-        onClose={() => setIsScheduleOpen(false)}
-        onSave={(data) => {
-          onAddSiteVisit(data);
-          setIsScheduleOpen(false);
-        }}
-      />
+      {!isAdmin && (
+        <ScheduleSiteVisitModal
+          isOpen={isScheduleOpen}
+          defaultDate={selectedDateForNew}
+          onClose={() => setIsScheduleOpen(false)}
+          onSave={(data) => {
+            onAddSiteVisit(data);
+            setIsScheduleOpen(false);
+          }}
+        />
+      )}
 
       <RescheduleSiteVisitModal
         visit={rescheduleVisit}
@@ -4199,18 +4213,20 @@ function SiteVisits({
         }}
       />
 
-      <ScheduleReminderModal
-        visits={scopedVisits}
-        initialVisit={reminderModalVisit}
-        isOpen={isReminderModalOpen}
-        onClose={() => {
-          setIsReminderModalOpen(false);
-          setReminderModalVisit(null);
-        }}
-        onSave={handleSaveReminder}
-        defaultDate={reminderModalDate}
-        defaultType={reminderModalType}
-      />
+      {!isAdmin && (
+        <ScheduleReminderModal
+          visits={scopedVisits}
+          initialVisit={reminderModalVisit}
+          isOpen={isReminderModalOpen}
+          onClose={() => {
+            setIsReminderModalOpen(false);
+            setReminderModalVisit(null);
+          }}
+          onSave={handleSaveReminder}
+          defaultDate={reminderModalDate}
+          defaultType={reminderModalType}
+        />
+      )}
     </Layout>
   );
 }
