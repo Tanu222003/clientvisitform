@@ -8710,3 +8710,856 @@ tbody tr:hover td.sticky-cell {
   gap: 8px;
   cursor: pointer;
 }
+
+/* ==========================================================================
+   ADMIN PROPERTY FILTER CHIPS BAR & CALENDAR ACTION BUTTONS BASE STYLES
+   ========================================================================== */
+.admin-prop-filter-chips-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.prop-filter-chip-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.prop-filter-chip-btn:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.prop-filter-chip-btn.active {
+  background: #1e293b;
+  color: #ffffff;
+  border-color: #1e293b;
+  box-shadow: 0 2px 6px rgba(30, 41, 59, 0.25);
+}
+
+.cal-day-panel-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cal-day-empty-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN: TABLETS (max-width: 1024px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  /* Calendar Grid on Tablets */
+  .calendar-container {
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+
+  .calendar-header {
+    gap: 12px;
+  }
+
+  .cal-day-cell {
+    min-height: 85px;
+    padding: 6px 4px;
+  }
+
+  .cal-chips-list {
+    max-height: 56px;
+  }
+
+  .cal-visit-chip {
+    font-size: 9.5px;
+    padding: 2px 4px;
+  }
+
+  .cal-day-visits-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  /* Site Visits Cards Grid on Tablets */
+  .site-visits-metric-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .sv-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .sv-completed-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .sv-toolbar {
+    gap: 12px;
+  }
+
+  .sv-search-box {
+    min-width: 220px;
+  }
+
+  .workflow-funnel-track {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .workflow-client-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN: PHONES & MOBILE SCREENS (max-width: 640px)
+   ========================================================================== */
+@media (max-width: 640px) {
+  /* General mobile optimizations */
+  .page-wrap {
+    padding: 12px 10px calc(84px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* --- Interactive Calendar Mobile Optimizations --- */
+  .calendar-container {
+    padding: 12px 8px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+  }
+
+  .calendar-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+  }
+
+  .calendar-month-title-wrap {
+    width: 100%;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .cal-title-icon-box {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+
+  .calendar-month-heading-row {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .calendar-month-heading-row h3 {
+    font-size: 16px;
+  }
+
+  .cal-month-badge {
+    font-size: 10px;
+    padding: 2px 7px;
+  }
+
+  .cal-subtitle {
+    font-size: 11px;
+    line-height: 1.3;
+  }
+
+  /* Calendar Month / Year / Prev / Today / Next Controls */
+  .calendar-nav-buttons {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .cal-month-select {
+    flex: 2 1 110px;
+    font-size: 12px;
+    padding: 7px 8px;
+    border-radius: 6px;
+  }
+
+  .cal-year-select {
+    flex: 1 1 65px;
+    font-size: 12px;
+    padding: 7px 8px;
+    border-radius: 6px;
+  }
+
+  .btn-cal-nav {
+    flex: 1 1 45px;
+    justify-content: center;
+    font-size: 11.5px;
+    padding: 7px 6px;
+    border-radius: 6px;
+  }
+
+  .btn-cal-today {
+    flex: 1 1 55px;
+    justify-content: center;
+    font-size: 11.5px;
+    padding: 7px 8px;
+    border-radius: 6px;
+  }
+
+  /* Category Filter Bar: Smooth Horizontal Swipe */
+  .cal-category-bar {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-wrap: nowrap;
+    padding: 8px 10px;
+    margin: 8px 0 12px 0;
+    gap: 6px;
+    border-radius: 8px;
+  }
+
+  .cal-category-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cal-category-label {
+    flex-shrink: 0;
+    font-size: 10.5px;
+    margin-right: 2px;
+  }
+
+  .cal-category-chips {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .cal-cat-chip {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+
+  /* Legend Bar on Mobile */
+  .cal-legend-bar {
+    padding: 8px 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+  }
+
+  .cal-legend-label {
+    font-size: 10px;
+    width: 100%;
+    margin-bottom: 2px;
+  }
+
+  .cal-legend-items {
+    gap: 6px 12px;
+    font-size: 10.5px;
+  }
+
+  .cal-legend-item {
+    font-size: 10.5px;
+    gap: 4px;
+  }
+
+  /* Weekdays Header */
+  .calendar-weekdays {
+    gap: 3px;
+    margin-bottom: 4px;
+  }
+
+  .calendar-weekday-cell {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 5px 0;
+    border-radius: 4px;
+    letter-spacing: 0;
+  }
+
+  /* 7-Day Calendar Grid on Mobile */
+  .calendar-grid {
+    gap: 3px;
+  }
+
+  .cal-day-cell {
+    min-height: 52px;
+    padding: 4px 2px;
+    border-radius: 6px;
+  }
+
+  .cal-day-num-wrap {
+    margin-bottom: 2px;
+    padding: 0 1px;
+  }
+
+  .cal-day-num {
+    font-size: 11px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0;
+  }
+
+  .cal-visit-count-tag {
+    font-size: 8.5px;
+    padding: 1px 4px;
+    min-width: 12px;
+    border-radius: 8px;
+  }
+
+  /* Cell add button hidden on mobile for tap safety */
+  .cal-cell-add-btn {
+    display: none !important;
+  }
+
+  .cal-chips-list {
+    gap: 2px;
+    max-height: 32px;
+  }
+
+  .cal-visit-chip {
+    padding: 1px 3px;
+    font-size: 8.5px;
+    border-radius: 3px;
+    border-left-width: 2px;
+    line-height: 1.25;
+  }
+
+  .cal-visit-chip .chip-time {
+    display: none;
+  }
+
+  .cal-visit-chip .chip-name {
+    font-size: 8.5px;
+    font-weight: 700;
+  }
+
+  .cal-more-visits {
+    font-size: 8px;
+    padding: 0 2px;
+  }
+
+  /* Selected Day Inspector Panel on Mobile */
+  .cal-selected-day-panel {
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .cal-day-panel-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+  }
+
+  .cal-day-panel-title {
+    gap: 8px;
+  }
+
+  .cal-panel-heading-row {
+    gap: 6px;
+  }
+
+  .cal-panel-heading-row h4 {
+    font-size: 14px;
+  }
+
+  .cal-day-panel-title p {
+    font-size: 11px;
+  }
+
+  .cal-day-panel-actions {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 6px;
+  }
+
+  .cal-day-panel-actions .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 9px 12px;
+    font-size: 12.5px;
+    min-height: 38px;
+  }
+
+  .cal-day-empty-actions {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 6px;
+  }
+
+  .cal-day-empty-actions .btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 38px;
+  }
+
+  /* Selected Day Visits Cards Grid */
+  .cal-day-visits-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .cal-day-visit-card {
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  .cal-dcard-client {
+    font-size: 13.5px;
+  }
+
+  .cal-dcard-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .cal-dcard-comms {
+    display: flex;
+    width: 100%;
+    gap: 6px;
+  }
+
+  .btn-call-mini,
+  .btn-wa-mini {
+    flex: 1;
+    justify-content: center;
+    padding: 8px 10px;
+    font-size: 12px;
+    min-height: 36px;
+  }
+
+  .cal-dcard-manage {
+    display: flex;
+    width: 100%;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .btn-mark-complete-mini,
+  .btn-resched-mini,
+  .btn-reopen-mini {
+    flex: 1 1 calc(50% - 3px);
+    justify-content: center;
+    padding: 8px 10px;
+    font-size: 11.5px;
+    min-height: 36px;
+  }
+
+  /* --- Site Visits Page & Toolbar Mobile Optimizations --- */
+  .site-visits-metric-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .sv-metric-card {
+    padding: 10px 12px;
+    gap: 10px;
+    border-radius: 10px;
+  }
+
+  .sv-metric-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+
+  .sv-metric-num {
+    font-size: 18px;
+  }
+
+  .sv-metric-card small {
+    font-size: 10px;
+  }
+
+  .sv-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  /* Horizontally Swipeable Property Pills in Site Visits */
+  .sv-property-pills {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-wrap: nowrap;
+    gap: 6px;
+    width: 100%;
+    padding-bottom: 3px;
+  }
+
+  .sv-property-pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sv-prop-pill {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 11.5px;
+    padding: 6px 12px;
+    border-radius: 6px;
+  }
+
+  .sv-search-box {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 8px 12px;
+  }
+
+  /* Horizontally Swipeable View Tabs in Site Visits */
+  .sv-view-tabs {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-wrap: nowrap;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 3px;
+    margin-bottom: 14px;
+    gap: 4px;
+  }
+
+  .sv-view-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sv-view-tab {
+    flex: 1 0 auto;
+    justify-content: center;
+    font-size: 11.5px;
+    padding: 7px 12px;
+    white-space: nowrap;
+  }
+
+  /* Site Visits Cards Grid */
+  .sv-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .sv-card {
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .sv-card-footer-actions {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .sv-btn-ctrl {
+    flex: 1 1 calc(50% - 3px);
+    min-height: 36px;
+    font-size: 11.5px;
+  }
+
+  .sv-btn-action {
+    min-height: 36px;
+  }
+
+  /* Completed Site Visits Grid */
+  .sv-completed-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .sv-completed-card {
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .sv-comp-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .sv-comp-actions {
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 6px;
+  }
+
+  .sv-comp-actions .btn {
+    flex: 1;
+    justify-content: center;
+    min-height: 36px;
+  }
+
+  .sv-table-panel {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+
+  /* --- Property Filters across CRM Screens --- */
+  .admin-prop-filter-chips-bar {
+    display: flex;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-wrap: nowrap !important;
+    gap: 6px;
+    margin-bottom: 12px;
+    padding-bottom: 4px;
+    width: 100%;
+  }
+
+  .admin-prop-filter-chips-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .prop-filter-chip-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 11px;
+    padding: 5px 12px !important;
+  }
+
+  .all-visits-prop-bar,
+  .clients-prop-filter-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 8px 10px;
+    margin-bottom: 12px;
+  }
+
+  .all-visits-prop-bar .prop-filter-label,
+  .clients-prop-filter-bar .prop-filter-label {
+    font-size: 10.5px;
+  }
+
+  .all-visits-prop-bar .prop-filter-chips,
+  .clients-prop-filter-bar .prop-filter-chips {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding-bottom: 3px;
+  }
+
+  .all-visits-prop-bar .prop-filter-chips::-webkit-scrollbar,
+  .clients-prop-filter-bar .prop-filter-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .prop-chip {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 11px;
+    padding: 5px 11px;
+  }
+
+  .workflow-prop-filters {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding-bottom: 3px;
+  }
+
+  .workflow-prop-filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .workflow-prop-chip {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 11px;
+    padding: 5px 11px;
+  }
+
+  /* --- Workflow Funnel Track on Mobile --- */
+  .workflow-funnel-track {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .workflow-funnel-node {
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
+
+  .workflow-client-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* --- Modals Mobile Touch Optimizations --- */
+  .reminder-modal-backdrop,
+  .site-visit-modal-backdrop,
+  .client-modal-backdrop {
+    padding: 8px;
+  }
+
+  .reminder-modal-card,
+  .site-visit-modal-card,
+  .client-modal-card {
+    max-width: 100%;
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 14px;
+  }
+
+  .reminder-modal-header,
+  .sv-modal-head,
+  .client-modal-head {
+    padding: 12px 14px;
+  }
+
+  .reminder-modal-form,
+  .sv-modal-form,
+  .client-modal-form {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .reminder-type-buttons {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .type-choice-btn {
+    padding: 9px 12px;
+    min-height: 40px;
+    font-size: 12.5px;
+  }
+
+  .reminder-quick-dates {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .chip-quick-date {
+    font-size: 11px;
+    padding: 5px 9px;
+  }
+
+  .reminder-modal-footer,
+  .sv-modal-actions,
+  .client-modal-actions {
+    flex-direction: column-reverse;
+    width: 100%;
+    gap: 8px;
+    padding-top: 12px;
+  }
+
+  .reminder-modal-footer .btn,
+  .sv-modal-actions .btn,
+  .client-modal-actions .btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 40px;
+    font-size: 13px;
+  }
+
+  /* --- Visit Submitted Confirmation Card Mobile --- */
+  .visit-submitted-wrap {
+    padding: 24px 12px;
+    min-height: 45vh;
+  }
+
+  .visit-submitted-card {
+    padding: 24px 16px;
+    border-radius: 14px;
+  }
+
+  .visit-submitted-title {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .visit-submitted-desc {
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .visit-submitted-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .visit-submitted-actions .btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 40px;
+  }
+}
+
+/* ==========================================================================
+   EXTRA-SMALL PHONES (max-width: 380px)
+   ========================================================================== */
+@media (max-width: 380px) {
+  .calendar-container {
+    padding: 10px 5px;
+  }
+
+  .cal-day-cell {
+    min-height: 48px;
+    padding: 2px 1px;
+  }
+
+  .cal-day-num {
+    font-size: 10px;
+    min-width: 16px;
+    height: 16px;
+  }
+
+  .calendar-weekday-cell {
+    font-size: 9px;
+    padding: 4px 0;
+  }
+
+  .cal-visit-count-tag {
+    font-size: 8px;
+    padding: 0 3px;
+  }
+
+  .cal-visit-chip .chip-name {
+    font-size: 7.5px;
+  }
+
+  .workflow-funnel-track {
+    grid-template-columns: 1fr;
+  }
+
+  .site-visits-metric-cards {
+    grid-template-columns: 1fr;
+  }
+}
+

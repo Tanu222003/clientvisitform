@@ -1998,22 +1998,11 @@ function Dashboard({ visits, onUpdateVisit, siteVisits = [] }) {
 
     {/* Admin Property Filter Tabs */}
     {!isPropertyScoped && (
-      <div className="admin-prop-filter-chips-bar" style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
+      <div className="admin-prop-filter-chips-bar">
         <button
           type="button"
           className={`prop-filter-chip-btn ${adminPropertyFilter === "ALL" ? "active" : ""}`}
           onClick={() => setAdminPropertyFilter("ALL")}
-          style={{
-            padding: "6px 14px",
-            borderRadius: "20px",
-            fontSize: "12px",
-            fontWeight: 600,
-            border: "1px solid",
-            cursor: "pointer",
-            background: adminPropertyFilter === "ALL" ? "#1e293b" : "#ffffff",
-            color: adminPropertyFilter === "ALL" ? "#ffffff" : "#475569",
-            borderColor: adminPropertyFilter === "ALL" ? "#1e293b" : "#cbd5e1"
-          }}
         >
           All Properties
         </button>
@@ -2023,17 +2012,6 @@ function Dashboard({ visits, onUpdateVisit, siteVisits = [] }) {
             key={p.name}
             className={`prop-filter-chip-btn ${adminPropertyFilter === p.name ? "active" : ""}`}
             onClick={() => setAdminPropertyFilter(p.name)}
-            style={{
-              padding: "6px 14px",
-              borderRadius: "20px",
-              fontSize: "12px",
-              fontWeight: 600,
-              border: "1px solid",
-              cursor: "pointer",
-              background: adminPropertyFilter === p.name ? "#1e293b" : "#ffffff",
-              color: adminPropertyFilter === p.name ? "#ffffff" : "#475569",
-              borderColor: adminPropertyFilter === p.name ? "#1e293b" : "#cbd5e1"
-            }}
           >
             {p.name}
           </button>
@@ -3324,7 +3302,7 @@ function CalendarView({
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          <div className="cal-day-panel-actions">
             <button
               type="button"
               className="btn secondary btn-add-reminder-day"
@@ -3346,7 +3324,7 @@ function CalendarView({
           <div className="cal-day-empty-state">
             <CalendarDays size={24} />
             <p>No site visits or client reminders scheduled for this date.</p>
-            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center" }}>
+            <div className="cal-day-empty-actions">
               <button
                 type="button"
                 className="btn secondary btn-sm"
