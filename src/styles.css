@@ -5003,6 +5003,7 @@ tbody tr:hover td.sticky-cell {
   border-radius: 4px;
 }
 
+.login-prop-badge.mudita,
 .login-prop-badge.park-solitaire {
   background: #eff6ff;
   color: #1d4ed8;
