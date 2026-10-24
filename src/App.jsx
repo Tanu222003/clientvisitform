@@ -3284,7 +3284,6 @@ function CalendarView({
                   {selectedDateVisits.length} {selectedDateVisits.length === 1 ? "Event & Reminder" : "Events & Reminders"}
                 </span>
               </div>
-              <p>Selected date schedule, client action reminders & quick communication</p>
             </div>
           </div>
 
