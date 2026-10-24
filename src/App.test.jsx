@@ -1076,19 +1076,22 @@ describe('Park Solitaire Client Visit App', () => {
       expect(screen.getByText('Sat')).toBeInTheDocument();
     });
 
-    it('displays day inspector panel for selected date and allows opening schedule modal with that date', () => {
+    it('renders single canonical schedule site visit button and opens schedule modal', () => {
       render(
         <MemoryRouter initialEntries={['/site-visits']}>
           <App />
         </MemoryRouter>
       );
 
-      // Verify day inspector header & schedule button
-      expect(screen.getByRole('button', { name: /Schedule Visit on this Date/i })).toBeInTheDocument();
+      // Verify Schedule Site Visit button is rendered once as the primary action
+      const scheduleBtns = screen.getAllByRole('button', { name: /Schedule Site Visit/i });
+      expect(scheduleBtns.length).toBe(1);
 
-      // Click schedule on this date
-      const scheduleBtn = screen.getByRole('button', { name: /Schedule Visit on this Date/i });
-      fireEvent.click(scheduleBtn);
+      // Verify Day Inspector has client reminder action
+      expect(screen.getByRole('button', { name: /Set Client Reminder/i })).toBeInTheDocument();
+
+      // Click the single schedule site visit button
+      fireEvent.click(scheduleBtns[0]);
 
       // Modal opens
       expect(screen.getByRole('heading', { level: 3, name: 'Schedule Site Visit' })).toBeInTheDocument();

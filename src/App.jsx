@@ -3181,18 +3181,6 @@ function CalendarView({
                       {cell.visits.length}
                     </span>
                   )}
-                  <button
-                    type="button"
-                    className="cal-cell-add-btn"
-                    title={`Schedule visit on ${cell.isoDate}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelectDate(cell.isoDate);
-                    }}
-                    aria-label={`Schedule on ${cell.isoDate}`}
-                  >
-                    <Plus size={12} />
-                  </button>
                 </div>
               </div>
 
@@ -3249,17 +3237,10 @@ function CalendarView({
           <div className="cal-day-panel-actions">
             <button
               type="button"
-              className="btn secondary btn-add-reminder-day"
+              className="btn primary btn-add-reminder-day"
               onClick={() => onOpenReminderModal && onOpenReminderModal(null, "followup", selectedIsoDate)}
             >
               <Bell size={13} /> Set Client Reminder
-            </button>
-            <button
-              type="button"
-              className="btn primary btn-schedule-day"
-              onClick={() => onSelectDate(selectedIsoDate)}
-            >
-              <Plus size={14} /> Schedule Visit on this Date
             </button>
           </div>
         </div>
@@ -3272,16 +3253,9 @@ function CalendarView({
               <button
                 type="button"
                 className="btn secondary btn-sm"
-                onClick={() => onSelectDate(selectedIsoDate)}
-              >
-                <Plus size={12} /> Book Client Walkthrough
-              </button>
-              <button
-                type="button"
-                className="btn secondary btn-sm"
                 onClick={() => onOpenReminderModal && onOpenReminderModal(null, "followup", selectedIsoDate)}
               >
-                <Bell size={12} /> Set Client Follow-up
+                <Bell size={12} /> Set Client Reminder
               </button>
             </div>
           </div>
@@ -3916,14 +3890,7 @@ function SiteVisits({
             <div className="table-empty-state">
               <CalendarDays size={32} />
               <h4>No upcoming site visits scheduled</h4>
-              <p>Schedule a new client walkthrough or clear your search filters.</p>
-              <button
-                type="button"
-                className="btn primary"
-                onClick={() => { setSelectedDateForNew(""); setIsScheduleOpen(true); }}
-              >
-                <Plus size={14} /> Schedule Site Visit
-              </button>
+              <p>Schedule a new client walkthrough using the button above or clear your search filters.</p>
             </div>
           ) : (
             <div className="sv-cards-grid">
