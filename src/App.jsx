@@ -661,8 +661,7 @@ function AdminBrand() {
         <ShieldCheck size={20} className="admin-brand-icon" />
       </div>
       <div>
-        <div className="brand-name">CRM Command</div>
-        <div className="brand-sub">Central Admin</div>
+        <div className="brand-name">Admin</div>
       </div>
     </div>
   );

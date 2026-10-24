@@ -865,8 +865,9 @@ describe('Park Solitaire Client Visit App', () => {
       expect(screen.queryByText(/Portfolio View:/i)).not.toBeInTheDocument();
       // Verify Property logo is REMOVED on admin dashboard
       expect(screen.queryByAltText('Park Solitaire')).not.toBeInTheDocument();
-      expect(screen.getByText('CRM Command')).toBeInTheDocument();
-      expect(screen.getByText('Central Admin')).toBeInTheDocument();
+      expect(screen.getByText('Admin')).toBeInTheDocument();
+      expect(screen.queryByText('CRM Command')).not.toBeInTheDocument();
+      expect(screen.queryByText('Central Admin')).not.toBeInTheDocument();
 
       // Verify Workflow Tracker is REMOVED from Admin Dashboard as requested
       expect(screen.queryByTestId('workflow-section')).not.toBeInTheDocument();
@@ -1135,7 +1136,7 @@ describe('Park Solitaire Client Visit App', () => {
       expect(sidebarBrand).toHaveAttribute('src', expect.stringContaining('luxury-empire-logo'));
     });
 
-    it('Admin dashboard maintains clean CRM Command brand without property logos', () => {
+    it('Admin dashboard maintains clean Admin brand without property logos', () => {
       localStorage.setItem("ps_current_user_v3", JSON.stringify({
         id: "admin",
         role: "admin",
@@ -1150,9 +1151,10 @@ describe('Park Solitaire Client Visit App', () => {
         </MemoryRouter>
       );
 
-      // Should show CRM Command Central Admin in sidebar, NOT any property logo
-      expect(screen.getByText('CRM Command')).toBeInTheDocument();
-      expect(screen.getByText('Central Admin')).toBeInTheDocument();
+      // Should show Admin in sidebar, NOT any property logo or CRM Command
+      expect(screen.getByText('Admin')).toBeInTheDocument();
+      expect(screen.queryByText('CRM Command')).not.toBeInTheDocument();
+      expect(screen.queryByText('Central Admin')).not.toBeInTheDocument();
       expect(screen.queryByAltText('Veena Developer Pvt LTD')).not.toBeInTheDocument();
       expect(screen.queryByAltText('Luxury Empire')).not.toBeInTheDocument();
     });
