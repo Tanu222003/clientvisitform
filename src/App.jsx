@@ -2401,12 +2401,7 @@ function VisitTable({ visits, onUpdateVisit, compact = false, editableStatus = t
               <td className="sticky-cell">
                 <div className="client-cell-wrap">
                   <span className="client-avatar-micro">{getInitials(v.name)}</span>
-                  <div className="client-name-prop-col">
-                    <b>{v.name}</b>
-                    <span className={`client-prop-mini-chip ${((v.propertyName || 'Park Solitaire')).toLowerCase().replace(/\s+/g, '-')}`}>
-                      {v.propertyName || 'Park Solitaire'}
-                    </span>
-                  </div>
+                  <b>{v.name}</b>
                 </div>
               </td>
               <td>{v.date}</td>
