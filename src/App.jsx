@@ -3136,47 +3136,6 @@ function CalendarView({
         </div>
       </div>
 
-      <div className="cal-category-bar">
-        <span className="cal-category-label">Filter View:</span>
-        <div className="cal-category-chips">
-          <button
-            type="button"
-            className={`cal-cat-chip ${categoryFilter === "all" ? "active" : ""}`}
-            onClick={() => setCategoryFilter("all")}
-          >
-            All Events ({categoryCounts.all})
-          </button>
-          <button
-            type="button"
-            className={`cal-cat-chip cat-followup ${categoryFilter === "followup" ? "active" : ""}`}
-            onClick={() => setCategoryFilter("followup")}
-          >
-            <Bell size={11} /> Follow-ups ({categoryCounts.followup})
-          </button>
-          <button
-            type="button"
-            className={`cal-cat-chip cat-revisit ${categoryFilter === "revisit" ? "active" : ""}`}
-            onClick={() => setCategoryFilter("revisit")}
-          >
-            <CalendarDays size={11} /> Re-visits ({categoryCounts.revisit})
-          </button>
-          <button
-            type="button"
-            className={`cal-cat-chip cat-booked ${categoryFilter === "booked" ? "active" : ""}`}
-            onClick={() => setCategoryFilter("booked")}
-          >
-            <Check size={11} /> Booked ({categoryCounts.booked})
-          </button>
-          <button
-            type="button"
-            className={`cal-cat-chip cat-walkthrough ${categoryFilter === "walkthrough" ? "active" : ""}`}
-            onClick={() => setCategoryFilter("walkthrough")}
-          >
-            <CheckCircle2 size={11} /> Walkthroughs ({categoryCounts.walkthrough})
-          </button>
-        </div>
-      </div>
-
       <div className="cal-legend-bar">
         <span className="cal-legend-label">Status Key:</span>
         <div className="cal-legend-items">

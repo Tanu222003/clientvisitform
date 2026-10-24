@@ -1200,10 +1200,8 @@ describe('Park Solitaire Client Visit App', () => {
         </MemoryRouter>
       );
 
-      // Verify Category filter chips are rendered
-      expect(screen.getByRole('button', { name: /Follow-ups/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /Re-visits/i })).toBeInTheDocument();
-      expect(screen.getAllByRole('button', { name: /Booked/i }).length).toBeGreaterThan(0);
+      // Verify calendar is rendered with status key
+      expect(screen.getByText('Status Key:')).toBeInTheDocument();
 
       // Check chips for visited clients and their reminders
       expect(screen.getAllByText(/Priya Patel/i).length).toBeGreaterThan(0);
