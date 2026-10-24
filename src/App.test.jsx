@@ -137,7 +137,7 @@ describe('Park Solitaire Client Visit App', () => {
   });
 
   describe('Form Submission to Dashboard', () => {
-    it('submits valid form and immediately navigates to Dashboard showing the new visit', async () => {
+    it('submits valid form, shows thank you confirmation card, and navigates to Dashboard via button', async () => {
       render(
         <MemoryRouter initialEntries={['/']}>
           <App />
@@ -153,7 +153,16 @@ describe('Park Solitaire Client Visit App', () => {
       const submitBtn = screen.getByRole('button', { name: /submit/i });
       fireEvent.click(submitBtn);
 
-      // Verify immediate redirection to Dashboard (Dashboard heading)
+      // Verify Thank you confirmation card is displayed
+      expect(screen.getByText(/Thank you for visiting Park Solitaire/i)).toBeInTheDocument();
+      expect(screen.getByText(/Vikram Malhotra/i)).toBeInTheDocument();
+
+      // Click Go to Dashboard
+      const goDashboardBtn = screen.getByRole('button', { name: /Go to Dashboard/i });
+      expect(goDashboardBtn).toBeInTheDocument();
+      fireEvent.click(goDashboardBtn);
+
+      // Verify redirection to Dashboard
       await waitFor(() => {
         expect(screen.getByRole('heading', { level: 1, name: /Dashboard/i })).toBeInTheDocument();
       });
@@ -161,10 +170,6 @@ describe('Park Solitaire Client Visit App', () => {
       // Verify the new submission is listed in the dashboard table
       expect(screen.getByText('Vikram Malhotra')).toBeInTheDocument();
       expect(screen.getByText('+91 98200 98200')).toBeInTheDocument();
-
-      // Verify no reference card is displayed
-      expect(screen.queryByText(/Thank you for submitting your details/i)).not.toBeInTheDocument();
-      expect(screen.queryByText(/Reference No\./i)).not.toBeInTheDocument();
     });
   });
 
@@ -759,6 +764,11 @@ describe('Park Solitaire Client Visit App', () => {
       const submitBtn = screen.getByRole('button', { name: /submit/i });
       fireEvent.click(submitBtn);
 
+      // Verify Thank you confirmation for Veena Developer Pvt LTD
+      expect(screen.getByText(/Thank you for visiting Veena Developer Pvt LTD/i)).toBeInTheDocument();
+      const goDashboardBtn = screen.getByRole('button', { name: /Go to Dashboard/i });
+      fireEvent.click(goDashboardBtn);
+
       // Verify redirect to Dashboard and visit is listed
       await waitFor(() => {
         expect(screen.getByRole('heading', { level: 1, name: /Dashboard/i })).toBeInTheDocument();
@@ -794,6 +804,11 @@ describe('Park Solitaire Client Visit App', () => {
 
       const submitBtn = screen.getByRole('button', { name: /submit/i });
       fireEvent.click(submitBtn);
+
+      // Verify Thank you confirmation for Park Solitaire
+      expect(screen.getByText(/Thank you for visiting Park Solitaire/i)).toBeInTheDocument();
+      const goDashboardBtn = screen.getByRole('button', { name: /Go to Dashboard/i });
+      fireEvent.click(goDashboardBtn);
 
       // Verify redirect to Park Solitaire Dashboard and visit is listed
       await waitFor(() => {
@@ -832,6 +847,11 @@ describe('Park Solitaire Client Visit App', () => {
 
       const submitBtn = screen.getByRole('button', { name: /submit/i });
       fireEvent.click(submitBtn);
+
+      // Verify Thank you confirmation for Luxury Empire
+      expect(screen.getByText(/Thank you for visiting Luxury Empire/i)).toBeInTheDocument();
+      const goDashboardBtn = screen.getByRole('button', { name: /Go to Dashboard/i });
+      fireEvent.click(goDashboardBtn);
 
       // Verify redirect to Luxury Empire Dashboard and visit is listed under Luxury Empire
       await waitFor(() => {

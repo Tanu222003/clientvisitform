@@ -4115,6 +4115,9 @@ function VisitForm({onAdd}) {
   const [customOtherTarget, setCustomOtherTarget] = useState("");
   const [form,setForm]=useState(initialForm);
   const [error,setError]=useState("");
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submittedProperty, setSubmittedProperty] = useState("");
+  const [submittedClientName, setSubmittedClientName] = useState("");
 
   useEffect(() => {
     if (isPropertyScoped && currentUser?.property) {
@@ -4168,8 +4171,72 @@ function VisitForm({onAdd}) {
       status:"Visited",
       remarks:form.remarks||""
     });
-    navigate("/admin");
+
+    setSubmittedProperty(assignedProperty);
+    setSubmittedClientName(form.name);
+    setIsSubmitted(true);
   }
+
+  if (isSubmitted) {
+    return (
+      <div className="form-page">
+        <div className="form-top">
+          {isPropertyScoped && currentUser?.property ? (
+            <PropertyBrand
+              propertyName={currentUser.property}
+              subtitle={currentUser.property === "Park Solitaire" ? "Lifespaces LLP" : "Visit Desk"}
+            />
+          ) : (
+            <Logo />
+          )}
+          <div className="form-top-actions">
+            <NavLink to="/login" className="form-desk-switch-link" title="Switch Desk / Login">
+              <Building2 size={13} />
+              <span>Switch Desk</span>
+            </NavLink>
+            <NavLink to="/admin" className="admin-link">Dashboard</NavLink>
+          </div>
+        </div>
+
+        <div className="visit-submitted-wrap">
+          <div className="visit-submitted-card">
+            <div className="visit-submitted-icon-wrap">
+              <CheckCircle2 size={34} />
+            </div>
+
+            <h2 className="visit-submitted-title">
+              Thank you for visiting {submittedProperty}!
+            </h2>
+
+            <p className="visit-submitted-desc">
+              Your visit details for <strong>{submittedClientName}</strong> have been recorded successfully.
+            </p>
+
+            <div className="visit-submitted-actions">
+              <button
+                type="button"
+                className="btn primary"
+                onClick={() => navigate("/admin")}
+              >
+                <LayoutDashboard size={16} /> Go to Dashboard
+              </button>
+              <button
+                type="button"
+                className="btn secondary"
+                onClick={() => {
+                  setForm(initialForm);
+                  setIsSubmitted(false);
+                }}
+              >
+                <Plus size={15} /> New Visit
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="form-page">
       <div className="form-top">
