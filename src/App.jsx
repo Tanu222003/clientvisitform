@@ -2166,7 +2166,7 @@ function Dashboard({ visits, onUpdateVisit, siteVisits = [] }) {
 }
 
 function PageHead({title,subtitle,children}) {
-  return <div className="page-head"><div><h1>{title}</h1><p>{subtitle}</p></div><div className="head-actions">{children}</div></div>
+  return <div className="page-head"><div><h1>{title}</h1>{subtitle ? <p>{subtitle}</p> : null}</div><div className="head-actions">{children}</div></div>
 }
 
 const STATUS_OPTIONS = ["Visited", "FollowUp", "Revisited", "Booked", "Closed"];
@@ -3824,7 +3824,7 @@ function SiteVisits({
         title="Site Visits"
         subtitle={isPropertyScoped
           ? `On-ground site visit management for ${currentUser.property} — calendar, upcoming visits & completed walkthroughs`
-          : "On-ground site visit coordination across Park Solitaire, VDPL, and Luxury Empire"}
+          : null}
       >
         <button className="btn secondary" onClick={() => exportSiteVisitsCSV(activeSiteVisits)}>
           <Download size={14} /> Export Visits
