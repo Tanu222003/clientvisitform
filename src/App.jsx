@@ -1980,13 +1980,11 @@ function Dashboard({ visits, onUpdateVisit, siteVisits = [] }) {
             <span>{formattedToday}</span>
           </div>
         </div>
-        <p className="hero-subtitle">
-          {isPropertyScoped
-            ? `Exclusive client pipeline, walkthrough tracking, and records for ${currentUser?.property || "this property"}`
-            : (adminPropertyFilter && adminPropertyFilter !== "ALL"
-                ? `Filtered operational view and walk-in records for ${adminPropertyFilter}`
-                : "Real-time client pipeline, site walkthrough tracking, and operational overview")}
-        </p>
+        {isPropertyScoped && (
+          <p className="hero-subtitle">
+            Exclusive client pipeline, walkthrough tracking, and records for {currentUser?.property || "this property"}
+          </p>
+        )}
       </div>
 
       <div className="hero-actions">
@@ -2031,7 +2029,6 @@ function Dashboard({ visits, onUpdateVisit, siteVisits = [] }) {
             <span className="dash-summary-number">{totalClientsCount}</span>
             <span className="dash-summary-pill gold">Profiles</span>
           </div>
-          <p className="dash-summary-foot">Unique registered clients</p>
         </div>
       </div>
 
@@ -2045,7 +2042,6 @@ function Dashboard({ visits, onUpdateVisit, siteVisits = [] }) {
             <span className="dash-summary-number">{totalEnquiriesCount}</span>
             <span className="dash-summary-pill blue">Logged</span>
           </div>
-          <p className="dash-summary-foot">All inquiry submissions</p>
         </div>
       </div>
 
@@ -2061,7 +2057,6 @@ function Dashboard({ visits, onUpdateVisit, siteVisits = [] }) {
               <span className="dash-pulse-dot" /> Live Today
             </span>
           </div>
-          <p className="dash-summary-foot">Scheduled on-ground visits</p>
         </div>
       </div>
 
@@ -2075,7 +2070,6 @@ function Dashboard({ visits, onUpdateVisit, siteVisits = [] }) {
             <span className="dash-summary-number">{pendingFollowupsCount}</span>
             <span className="dash-summary-pill amber">Active</span>
           </div>
-          <p className="dash-summary-foot">Callbacks requiring action</p>
         </div>
       </div>
 
@@ -2089,7 +2083,6 @@ function Dashboard({ visits, onUpdateVisit, siteVisits = [] }) {
             <span className="dash-summary-number">{totalBookingsCount}</span>
             <span className="dash-summary-pill purple">Deals</span>
           </div>
-          <p className="dash-summary-foot">Units booked / closed</p>
         </div>
       </div>
     </div>
@@ -2104,7 +2097,6 @@ function Dashboard({ visits, onUpdateVisit, siteVisits = [] }) {
               {recentVisitsBase.length} recent {isFallback ? "(Latest)" : "(Today & Yesterday)"}
             </span>
           </div>
-          <p>{isFallback ? "Showing latest client visit submissions (read-only status)" : "Showing client visits from Today & Yesterday only (read-only status)"}</p>
         </div>
         <div className="panel-head-actions dashboard-recent-actions">
           <div className="recent-search-wrap">
