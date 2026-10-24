@@ -3734,9 +3734,6 @@ function SiteVisits({
     <Layout>
       <PageHead
         title="Site Visits"
-        subtitle={isPropertyScoped
-          ? `On-ground site visit management for ${currentUser.property} — calendar, upcoming visits & completed walkthroughs`
-          : null}
       >
         <button className="btn secondary" onClick={() => exportSiteVisitsCSV(activeSiteVisits)}>
           <Download size={14} /> Export Visits
