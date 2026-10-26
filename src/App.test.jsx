@@ -12,7 +12,7 @@ describe('Park Solitaire Client Visit App', () => {
   });
 
   describe('Branding and Initial Navigation', () => {
-    it('renders Mudita Builders and developers branding and logo', () => {
+    it('renders Mudita branding and logo without Builders and developers', () => {
       render(
         <MemoryRouter initialEntries={['/']}>
           <App />
@@ -22,8 +22,7 @@ describe('Park Solitaire Client Visit App', () => {
       const brandNames = screen.getAllByText(/Mudita/i);
       expect(brandNames.length).toBeGreaterThan(0);
 
-      const subBrands = screen.getAllByText(/Builders and developers/i);
-      expect(subBrands.length).toBeGreaterThan(0);
+      expect(screen.queryByText(/Builders and developers/i)).not.toBeInTheDocument();
 
       const logo = screen.getByAltText(/Mudita/i);
       expect(logo).toBeInTheDocument();
@@ -755,6 +754,35 @@ describe('Park Solitaire Client Visit App', () => {
       // Verify 1-Click Fast Access (Instant Launch) is REMOVED
       expect(screen.queryByText(/1-Click Fast Access/i)).not.toBeInTheDocument();
       expect(screen.queryByText(/Instant Launch/i)).not.toBeInTheDocument();
+    });
+
+    it('authenticates master admin login with Pateljagrut634@gmail.com and Jagrut@634', () => {
+      render(
+        <MemoryRouter initialEntries={['/login']}>
+          <App />
+        </MemoryRouter>
+      );
+
+      // Switch to Master Admin Command tab
+      const adminTab = screen.getByRole('button', { name: /Master Admin Command/i });
+      fireEvent.click(adminTab);
+
+      // Check default username input has Pateljagrut634@gmail.com
+      const userInput = screen.getByPlaceholderText('Pateljagrut634@gmail.com');
+      const passInput = screen.getByPlaceholderText('Password (Jagrut@634)');
+
+      expect(userInput).toBeInTheDocument();
+      expect(passInput).toBeInTheDocument();
+
+      fireEvent.change(userInput, { target: { value: 'Pateljagrut634@gmail.com' } });
+      fireEvent.change(passInput, { target: { value: 'Jagrut@634' } });
+
+      // Click Access Master Command
+      const submitBtn = screen.getByRole('button', { name: /Access Master Command/i });
+      fireEvent.click(submitBtn);
+
+      // Successfully redirected to dashboard
+      expect(screen.getByRole('heading', { level: 1, name: /Dashboard/i })).toBeInTheDocument();
     });
 
     it('separates Visit Form and Dashboard for a specific property desk login (Veena Developer Pvt LTD)', async () => {

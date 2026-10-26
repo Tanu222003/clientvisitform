@@ -74,8 +74,8 @@ app.get('/api/properties', (req, res) => {
 app.post('/api/auth/login', (req, res) => {
   const { role, username, password, propertyName } = req.body;
 
-  if (role === 'admin' || username === 'admin') {
-    if (password && password !== 'admin' && password !== 'admin123') {
+  if (role === 'admin' || username === 'admin' || (username && username.toLowerCase() === 'pateljagrut634@gmail.com')) {
+    if (password && password !== 'Jagrut@634' && password !== 'admin' && password !== 'admin123') {
       return res.status(401).json({ success: false, error: 'Invalid admin password' });
     }
     return res.json({
@@ -84,7 +84,7 @@ app.post('/api/auth/login', (req, res) => {
         id: 'admin',
         role: 'admin',
         name: 'Master Admin',
-        email: 'admin@parksolitaire.com',
+        email: 'Pateljagrut634@gmail.com',
         property: 'ALL'
       }
     });

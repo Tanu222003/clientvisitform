@@ -151,7 +151,7 @@ export const DEFAULT_ADMIN_USER = {
   id: "admin",
   role: "admin",
   name: "Master Admin",
-  email: "admin@parksolitaire.com",
+  email: "Pateljagrut634@gmail.com",
   property: "ALL"
 };
 
@@ -201,7 +201,7 @@ export function AuthProvider({ children }) {
         id: "admin",
         role: "admin",
         name: staffName || "Master Admin",
-        email: "admin@parksolitaire.com",
+        email: "Pateljagrut634@gmail.com",
         property: "ALL"
       };
       setCurrentUser(adminUser);
@@ -648,10 +648,9 @@ export function useSiteVisits() {
 function Logo() {
   return (
     <div className="brand brand-mudita">
-      <img src={muditaLogoImg} alt="Mudita Builders and developers" className="brand-logo" />
+      <img src={muditaLogoImg} alt="Mudita" className="brand-logo" />
       <div>
         <div className="brand-name mudita-brand-name" style={{ color: "#756354", WebkitTextFillColor: "#756354", background: "none" }}>Mudita</div>
-        <div className="brand-sub mudita-brand-sub" style={{ color: "#49382B", WebkitTextFillColor: "#49382B", background: "none" }}>Builders and developers</div>
       </div>
     </div>
   );
@@ -687,9 +686,9 @@ function PropertyBrand({ propertyName, subtitle }) {
   const displayName = propertyName || "Mudita";
   const isMudita = displayName.toLowerCase().includes("mudita");
   const isPark = !isMudita && (displayName.toLowerCase().includes("park solitaire") || displayName.toLowerCase().includes("solitaire") || displayName.toLowerCase().includes("lifespaces"));
-  const defaultSub = isMudita ? "Builders and developers" : (isPark ? "Lifespaces LLP" : "Sales Desk");
-  const finalSub = subtitle || defaultSub;
-  const brandTitle = isMudita ? (displayName.includes("Builders") ? "Mudita" : displayName) : (isPark ? "Park Solitaire" : displayName);
+  const defaultSub = isMudita ? "" : (isPark ? "Lifespaces LLP" : "Sales Desk");
+  const finalSub = subtitle !== undefined ? subtitle : defaultSub;
+  const brandTitle = isMudita ? "Mudita" : (isPark ? "Park Solitaire" : displayName);
   return (
     <div className={`brand property-brand-wrapper ${isMudita ? "brand-mudita" : ""}`}>
       {logo ? (
@@ -706,12 +705,14 @@ function PropertyBrand({ propertyName, subtitle }) {
         >
           {brandTitle}
         </div>
-        <div
-          className={`brand-sub ${isMudita ? "mudita-brand-sub" : ""}`}
-          style={isMudita ? { color: "#49382B", WebkitTextFillColor: "#49382B", background: "none" } : undefined}
-        >
-          {finalSub}
-        </div>
+        {finalSub ? (
+          <div
+            className={`brand-sub ${isMudita ? "mudita-brand-sub" : ""}`}
+            style={isMudita ? { color: "#49382B", WebkitTextFillColor: "#49382B", background: "none" } : undefined}
+          >
+            {finalSub}
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -723,8 +724,8 @@ function LoginScreen({ onLogin }) {
   const [customPropertyName, setCustomPropertyName] = useState("");
   const [deskName, setDeskName] = useState("Sales Desk");
   const [pin, setPin] = useState("solitaire123");
-  const [adminUser, setAdminUser] = useState("admin");
-  const [adminPass, setAdminPass] = useState("admin123");
+  const [adminUser, setAdminUser] = useState("Pateljagrut634@gmail.com");
+  const [adminPass, setAdminPass] = useState("Jagrut@634");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -747,8 +748,11 @@ function LoginScreen({ onLogin }) {
   const handleAdminSubmit = (e) => {
     e.preventDefault();
     setError("");
-    if (adminUser.trim() !== "admin" || (adminPass !== "admin" && adminPass !== "admin123")) {
-      setError("Invalid admin credentials. Hint: admin / admin123");
+    const inputUser = adminUser.trim().toLowerCase();
+    const isMasterUser = inputUser === "pateljagrut634@gmail.com" || inputUser === "admin";
+    const isMasterPass = adminPass === "Jagrut@634" || adminPass === "admin123" || adminPass === "admin";
+    if (!isMasterUser || !isMasterPass) {
+      setError("Invalid admin credentials. Use Pateljagrut634@gmail.com / Jagrut@634");
       return;
     }
     if (onLogin) {
@@ -769,7 +773,6 @@ function LoginScreen({ onLogin }) {
             <img src={muditaLogoImg} alt="Mudita" className="brand-logo" />
             <div>
               <div className="brand-name mudita-brand-name" style={{ color: "#756354", WebkitTextFillColor: "#756354", background: "none" }}>Mudita</div>
-              <div className="brand-sub mudita-brand-sub" style={{ color: "#49382B", WebkitTextFillColor: "#49382B", background: "none" }}>Builders and Developers</div>
             </div>
           </div>
           <div className="login-portal-tag">
@@ -902,7 +905,7 @@ function LoginScreen({ onLogin }) {
                 type="text"
                 value={adminUser}
                 onChange={e => setAdminUser(e.target.value)}
-                placeholder="admin"
+                placeholder="Pateljagrut634@gmail.com"
               />
             </div>
 
@@ -912,7 +915,7 @@ function LoginScreen({ onLogin }) {
                 type="password"
                 value={adminPass}
                 onChange={e => setAdminPass(e.target.value)}
-                placeholder="Password (admin123)"
+                placeholder="Password (Jagrut@634)"
               />
             </div>
 
@@ -947,8 +950,8 @@ function Layout({children}) {
     ? (currentUser.property.split(" ").map(w => w[0]).join("").slice(0, 2))
     : "A";
 
-  const userDisplayName = currentUser?.name || (isProperty ? `${currentUser.property} Desk` : "Admin");
-  const userSubText = isProperty ? `${currentUser.property} Operations` : "admin@parksolitaire.com";
+  const userDisplayName = currentUser?.name || (isProperty ? `${currentUser.property} Desk` : "Master Admin");
+  const userSubText = isProperty ? `${currentUser.property} Operations` : (currentUser?.email || "Pateljagrut634@gmail.com");
 
   return (
     <div className="app-shell">
