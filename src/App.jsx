@@ -770,7 +770,6 @@ function LoginScreen({ onLogin }) {
             <span>OPERATIONS ACCESS PORTAL</span>
           </div>
           <h1>Multi-Property Access</h1>
-          <p>Login to your dedicated property desk or access master command across all properties</p>
         </div>
 
         <div className="login-tab-switcher">

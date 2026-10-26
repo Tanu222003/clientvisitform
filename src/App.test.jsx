@@ -737,6 +737,7 @@ describe('Park Solitaire Client Visit App', () => {
       );
 
       expect(screen.getByRole('heading', { level: 1, name: /Multi-Property Access/i })).toBeInTheDocument();
+      expect(screen.queryByText(/Login to your dedicated property desk/i)).not.toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Property Desk Login/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Master Admin Command/i })).toBeInTheDocument();
 
