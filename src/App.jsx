@@ -79,17 +79,17 @@ function isTodayOrYesterday(dateStr) {
 
 export const AVAILABLE_PROPERTIES = [
   {
-    id: "mudita",
-    name: "Mudita Builders and developers",
-    shortName: "Mudita",
-    fullName: "Mudita Builders and developers",
-    category: "Residential & Commercial",
-    tagline: "Builders and developers",
-    location: "Mumbai",
+    id: "park-solitaire",
+    name: "Park Solitaire Lifespaces LLP",
+    shortName: "Park Solitaire",
+    fullName: "Park Solitaire Lifespaces LLP",
+    category: "Residential",
+    tagline: "Signature Luxury Residences",
+    location: "Andheri West, Mumbai",
     accentColor: "#c29135",
     badgeClass: "badge-gold",
     units: ["1BHK", "2BHK", "3BHK", "2BHK Jodi"],
-    logo: muditaLogoImg
+    logo: logoImg
   },
   {
     id: "veena-developer",
@@ -710,10 +710,10 @@ function PropertyBrand({ propertyName, subtitle }) {
 
 function LoginScreen({ onLogin }) {
   const [tab, setTab] = useState("property");
-  const [selectedProperty, setSelectedProperty] = useState("Mudita Builders and developers");
+  const [selectedProperty, setSelectedProperty] = useState("Park Solitaire Lifespaces LLP");
   const [customPropertyName, setCustomPropertyName] = useState("");
   const [deskName, setDeskName] = useState("Sales Desk");
-  const [pin, setPin] = useState("mudita123");
+  const [pin, setPin] = useState("solitaire123");
   const [adminUser, setAdminUser] = useState("admin");
   const [adminPass, setAdminPass] = useState("admin123");
   const [error, setError] = useState("");
@@ -750,7 +750,7 @@ function LoginScreen({ onLogin }) {
 
   const activeDisplayProp = (selectedProperty === "Other" && customPropertyName.trim())
     ? customPropertyName.trim()
-    : selectedProperty;
+    : (selectedProperty.toLowerCase().includes("park solitaire") ? "Park Solitaire" : selectedProperty);
 
   return (
     <div className="login-portal-page">
@@ -807,7 +807,6 @@ function LoginScreen({ onLogin }) {
                       if (lower.includes("veena")) setPin("veena123");
                       else if (lower.includes("luxury")) setPin("luxury123");
                       else if (lower.includes("other")) setPin("desk123");
-                      else if (lower.includes("mudita")) setPin("mudita123");
                       else setPin("solitaire123");
                     }}
                   >
@@ -867,9 +866,7 @@ function LoginScreen({ onLogin }) {
                         ? "PIN (luxury123)"
                         : selectedProperty === "Other"
                           ? "PIN (desk123)"
-                          : selectedProperty.toLowerCase().includes("mudita")
-                            ? "PIN (mudita123)"
-                            : "PIN (solitaire123)"
+                          : "PIN (solitaire123)"
                   }
                 />
               </div>
