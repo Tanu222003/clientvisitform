@@ -4874,6 +4874,30 @@ tbody tr:hover td.sticky-cell {
   text-transform: uppercase;
 }
 
+/* Mudita Brand Colors: Warm Taupe (#756354) & Dark Brown (#49382B) */
+.mudita-brand-name,
+.brand-mudita .brand-name,
+.portal-brand-mudita .brand-name,
+.login-portal-brand .brand-mudita .brand-name,
+.login-portal-brand .portal-brand-mudita .brand-name {
+  color: #756354 !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: #756354 !important;
+}
+
+.mudita-brand-sub,
+.brand-mudita .brand-sub,
+.portal-brand-mudita .brand-sub,
+.login-portal-brand .brand-mudita .brand-sub,
+.login-portal-brand .portal-brand-mudita .brand-sub {
+  color: #49382B !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: #49382B !important;
+  opacity: 1 !important;
+}
+
 .login-portal-tag {
   display: inline-flex;
   align-items: center;

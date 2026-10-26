@@ -648,11 +648,11 @@ export function useSiteVisits() {
 
 function Logo() {
   return (
-    <div className="brand">
+    <div className="brand brand-mudita">
       <img src={muditaLogoImg} alt="Mudita Builders and developers" className="brand-logo" />
       <div>
-        <div className="brand-name">Mudita</div>
-        <div className="brand-sub">Builders and developers</div>
+        <div className="brand-name mudita-brand-name" style={{ color: "#756354", WebkitTextFillColor: "#756354", background: "none" }}>Mudita</div>
+        <div className="brand-sub mudita-brand-sub" style={{ color: "#49382B", WebkitTextFillColor: "#49382B", background: "none" }}>Builders and developers</div>
       </div>
     </div>
   );
@@ -692,7 +692,7 @@ function PropertyBrand({ propertyName, subtitle }) {
   const finalSub = subtitle || defaultSub;
   const brandTitle = isMudita ? (displayName.includes("Builders") ? "Mudita" : displayName) : (isPark ? "Park Solitaire" : displayName);
   return (
-    <div className="brand property-brand-wrapper">
+    <div className={`brand property-brand-wrapper ${isMudita ? "brand-mudita" : ""}`}>
       {logo ? (
         <img src={logo} alt={brandTitle} className="brand-logo property-img-logo" />
       ) : (
@@ -701,8 +701,18 @@ function PropertyBrand({ propertyName, subtitle }) {
         </div>
       )}
       <div>
-        <div className="brand-name">{brandTitle}</div>
-        <div className="brand-sub">{finalSub}</div>
+        <div
+          className={`brand-name ${isMudita ? "mudita-brand-name" : ""}`}
+          style={isMudita ? { color: "#756354", WebkitTextFillColor: "#756354", background: "none" } : undefined}
+        >
+          {brandTitle}
+        </div>
+        <div
+          className={`brand-sub ${isMudita ? "mudita-brand-sub" : ""}`}
+          style={isMudita ? { color: "#49382B", WebkitTextFillColor: "#49382B", background: "none" } : undefined}
+        >
+          {finalSub}
+        </div>
       </div>
     </div>
   );
@@ -756,11 +766,11 @@ function LoginScreen({ onLogin }) {
     <div className="login-portal-page">
       <div className="login-portal-card">
         <div className="login-portal-brand">
-          <div className="brand portal-brand-mudita">
+          <div className="brand portal-brand-mudita brand-mudita">
             <img src={muditaLogoImg} alt="Mudita" className="brand-logo" />
             <div>
-              <div className="brand-name">Mudita</div>
-              <div className="brand-sub">Builders and Developers</div>
+              <div className="brand-name mudita-brand-name" style={{ color: "#756354", WebkitTextFillColor: "#756354", background: "none" }}>Mudita</div>
+              <div className="brand-sub mudita-brand-sub" style={{ color: "#49382B", WebkitTextFillColor: "#49382B", background: "none" }}>Builders and Developers</div>
             </div>
           </div>
           <div className="login-portal-tag">
