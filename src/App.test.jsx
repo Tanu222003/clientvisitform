@@ -12,21 +12,19 @@ describe('Park Solitaire Client Visit App', () => {
   });
 
   describe('Branding and Initial Navigation', () => {
-    it('renders Mudita branding and logo without Builders and developers', () => {
+    it('renders only logo for Mudita and does not render text word Mudita or Builders', () => {
       render(
         <MemoryRouter initialEntries={['/']}>
           <App />
         </MemoryRouter>
       );
 
-      const brandNames = screen.getAllByText(/Mudita/i);
-      expect(brandNames.length).toBeGreaterThan(0);
-
-      expect(screen.queryByText(/Builders and developers/i)).not.toBeInTheDocument();
-
       const logo = screen.getByAltText(/Mudita/i);
       expect(logo).toBeInTheDocument();
       expect(logo).toHaveAttribute('src');
+
+      expect(screen.queryByText(/^Mudita$/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Builders and developers/i)).not.toBeInTheDocument();
     });
 
     it('does NOT have the Properties option in navigation', () => {

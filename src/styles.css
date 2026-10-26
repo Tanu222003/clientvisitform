@@ -4874,6 +4874,31 @@ tbody tr:hover td.sticky-cell {
   text-transform: uppercase;
 }
 
+/* Mudita standalone logo presentation (show only logo) */
+.brand-mudita {
+  display: inline-flex;
+  align-items: center;
+}
+
+.brand-mudita .brand-logo,
+.form-top .brand-mudita .brand-logo {
+  height: 48px;
+  width: auto;
+  max-width: 160px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.12));
+}
+
+.login-portal-brand .brand-mudita .brand-logo,
+.login-portal-brand .portal-brand-mudita .brand-logo {
+  height: 68px;
+  width: auto;
+  max-width: 220px;
+  object-fit: contain;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.12));
+}
+
 /* Mudita Brand Colors: Warm Taupe (#756354) & Dark Brown (#49382B) */
 .mudita-brand-name,
 .brand-mudita .brand-name,

@@ -647,11 +647,8 @@ export function useSiteVisits() {
 
 function Logo() {
   return (
-    <div className="brand brand-mudita">
+    <div className="brand brand-mudita" title="Mudita">
       <img src={muditaLogoImg} alt="Mudita" className="brand-logo" />
-      <div>
-        <div className="brand-name mudita-brand-name" style={{ color: "#756354", WebkitTextFillColor: "#756354", background: "none" }}>Mudita</div>
-      </div>
     </div>
   );
 }
@@ -688,32 +685,28 @@ function PropertyBrand({ propertyName, subtitle }) {
   const isPark = !isMudita && (displayName.toLowerCase().includes("park solitaire") || displayName.toLowerCase().includes("solitaire") || displayName.toLowerCase().includes("lifespaces"));
   const defaultSub = isMudita ? "" : (isPark ? "Lifespaces LLP" : "Sales Desk");
   const finalSub = subtitle !== undefined ? subtitle : defaultSub;
-  const brandTitle = isMudita ? "Mudita" : (isPark ? "Park Solitaire" : displayName);
+  const brandTitle = isMudita ? "" : (isPark ? "Park Solitaire" : displayName);
   return (
-    <div className={`brand property-brand-wrapper ${isMudita ? "brand-mudita" : ""}`}>
+    <div className={`brand property-brand-wrapper ${isMudita ? "brand-mudita" : ""}`} title={displayName}>
       {logo ? (
-        <img src={logo} alt={brandTitle} className="brand-logo property-img-logo" />
+        <img src={logo} alt={displayName} className="brand-logo property-img-logo" />
       ) : (
         <div className="admin-brand-icon-box" style={{ width: 36, height: 36 }}>
           <Building2 size={18} />
         </div>
       )}
-      <div>
-        <div
-          className={`brand-name ${isMudita ? "mudita-brand-name" : ""}`}
-          style={isMudita ? { color: "#756354", WebkitTextFillColor: "#756354", background: "none" } : undefined}
-        >
-          {brandTitle}
-        </div>
-        {finalSub ? (
-          <div
-            className={`brand-sub ${isMudita ? "mudita-brand-sub" : ""}`}
-            style={isMudita ? { color: "#49382B", WebkitTextFillColor: "#49382B", background: "none" } : undefined}
-          >
-            {finalSub}
+      {!isMudita && (
+        <div>
+          <div className="brand-name">
+            {brandTitle}
           </div>
-        ) : null}
-      </div>
+          {finalSub ? (
+            <div className="brand-sub">
+              {finalSub}
+            </div>
+          ) : null}
+        </div>
+      )}
     </div>
   );
 }
@@ -769,11 +762,8 @@ function LoginScreen({ onLogin }) {
     <div className="login-portal-page">
       <div className="login-portal-card">
         <div className="login-portal-brand">
-          <div className="brand portal-brand-mudita brand-mudita">
+          <div className="brand portal-brand-mudita brand-mudita" title="Mudita">
             <img src={muditaLogoImg} alt="Mudita" className="brand-logo" />
-            <div>
-              <div className="brand-name mudita-brand-name" style={{ color: "#756354", WebkitTextFillColor: "#756354", background: "none" }}>Mudita</div>
-            </div>
           </div>
           <div className="login-portal-tag">
             <Sparkles size={13} className="hero-badge-sparkle" />
