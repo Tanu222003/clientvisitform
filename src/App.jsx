@@ -260,28 +260,32 @@ export function AuthProvider({ children }) {
   );
 }
 
-const seedVisits = [
-  {id:1,name:"Rahul Sharma",date:getRelativeDateStr(0),phone:"+91 98765 43210",mail:"rahul.s@email.com",address:"Andheri West, Mumbai",profession:"Business",interest:"2BHK",aspiration:"Personal Use",budget:"45 Lakh",source:"Walk-in",status:"Visited",visitsCount:1,propertyName:"Park Solitaire",remarks:"Client showed keen interest in east-facing 2BHK on higher floor. Loan eligibility check underway."},
-  {id:2,name:"Priya Patel",date:getRelativeDateStr(0),phone:"+91 87654 32109",mail:"priya.p@email.com",address:"Bandra East, Mumbai",profession:"Doctor",interest:"3BHK",aspiration:"Investment",budget:"1.2 Cr",source:"Website",status:"FollowUp",followUpDate:getRelativeDateStr(0),visitsCount:2,propertyName:"Park Solitaire",remarks:"Requested detailed rental yield analysis and construction milestone schedule. Follow-up call on Tuesday."},
-  {id:3,name:"Amit Verma",date:getRelativeDateStr(1),phone:"+91 99887 66554",mail:"amit.v@email.com",address:"Thane West",profession:"Service",interest:"SHOP",aspiration:"Investment",budget:"75 Lakh",source:"Website",status:"Revisited",revisitDate:getRelativeDateStr(0),visitsCount:1,propertyName:"Veena Developer Pvt LTD",remarks:"Revisited the ground floor retail arcade with his business partner. Discussing corner shop options."},
-  {id:4,name:"Sneha Reddy",date:getRelativeDateStr(1),phone:"+91 91234 56789",mail:"sneha.r@email.com",address:"Powai, Mumbai",profession:"Teacher",interest:"2BHK JODI",aspiration:"Personal Use",budget:"90 Lakh",source:"Director Reference",status:"Booked",visitsCount:1,propertyName:"Park Solitaire",remarks:"Booking token received. Unit 1204 reserved; KYC documents collected for agreement draft."},
-  {id:5,name:"Vikram Singh",date:getRelativeDateStr(1),phone:"+91 98123 45678",mail:"vikram.s@email.com",address:"Lower Parel",profession:"Business",interest:"OFFICE",aspiration:"Investment",budget:"1.5 Cr",source:"Outdoor Banner",status:"FollowUp",visitsCount:3,propertyName:"Veena Developer Pvt LTD",remarks:"Examining floor layout options for 40-seat commercial office. Second meeting with legal advisor set."},
-  {id:6,name:"Ananya Joshi",date:getRelativeDateStr(2),phone:"+91 90011 22334",mail:"ananya.j@email.com",address:"Malad West",profession:"CA",interest:"1BHK",aspiration:"Personal Use",budget:"35 Lakh",source:"Pamphlet",status:"Visited",visitsCount:1,propertyName:"Park Solitaire",remarks:"First visit completed. Appreciated modern amenities and road connectivity. Discussing budget with family."},
-  {id:7,name:"Rohan Mehta",date:getRelativeDateStr(3),phone:"+91 95555 11223",mail:"rohan.m@email.com",address:"Navi Mumbai",profession:"Engineer",interest:"2BHK",aspiration:"Personal Use",budget:"55 Lakh",source:"Website",status:"Revisited",visitsCount:2,propertyName:"Park Solitaire",remarks:"Second walkthrough completed. Very satisfied with clubhouse design and podium parking layout."},
-  {id:8,name:"Kavita Nair",date:getRelativeDateStr(4),phone:"+91 94444 77889",mail:"kavita.n@email.com",address:"Goregaon East",profession:"Homemaker",interest:"3BHK",aspiration:"Personal Use",budget:"1.1 Cr",source:"Existing Customer",status:"Closed",visitsCount:1,propertyName:"Park Solitaire",remarks:"Registration completed at sub-registrar office. Welcome kit delivered to client."},
-  {id:9,name:"Suresh Kumar",date:getRelativeDateStr(5),phone:"+91 93333 44556",mail:"suresh.k@email.com",address:"Vashi, Navi Mumbai",profession:"Business",interest:"JODI SHOPS",aspiration:"Investment",budget:"2 Cr",source:"Channel Partner",status:"Visited",visitsCount:1,propertyName:"Veena Developer Pvt LTD",remarks:"Inquired about multi-brand retail possibilities on frontage area. Proposal sent via email."},
-  {id:10,name:"Meera Iyer",date:getRelativeDateStr(6),phone:"+91 96666 55443",mail:"meera.i@email.com",address:"Worli, Mumbai",profession:"Lawyer",interest:"3BHK",aspiration:"Investment",budget:"1.8 Cr",source:"Director Reference",status:"FollowUp",visitsCount:1,propertyName:"Luxury Empire",remarks:"Reviewed luxury specifications. Waiting for customized flexi-payment scheme approval."},
-  {id:11,name:"Arjun Kapoor",date:getRelativeDateStr(7),phone:"+91 98888 12345",mail:"arjun.k@email.com",address:"Juhu, Mumbai",profession:"Architect",interest:"2BHK",aspiration:"Personal Use",budget:"85 Lakh",source:"Walk-in",status:"Visited",visitsCount:1,propertyName:"Park Solitaire",remarks:"Studied architectural floor plans. Interested in high ceiling height on tower 2."},
-  {id:12,name:"Deepa Shah",date:getRelativeDateStr(8),phone:"+91 97777 98765",mail:"deepa.s@email.com",address:"Borivali West",profession:"Consultant",interest:"1BHK",aspiration:"Personal Use",budget:"42 Lakh",source:"Website",status:"Visited",visitsCount:1,propertyName:"Luxury Empire",remarks:"Looking for ready-to-move or near-possession timeline. Follow up in two days."},
-  {id:13,name:"Karan Johar",date:getRelativeDateStr(9),phone:"+91 96666 11223",mail:"karan.j@email.com",address:"Bandra West",profession:"Producer",interest:"OFFICE",aspiration:"Investment",budget:"3.5 Cr",source:"Channel Partner",status:"FollowUp",visitsCount:2,propertyName:"Luxury Empire",remarks:"Requested penthouse office availability with private elevator access."},
-  {id:14,name:"Neha Sharma",date:getRelativeDateStr(10),phone:"+91 95555 33445",mail:"neha.s@email.com",address:"Kandivali East",profession:"Dentist",interest:"2BHK",aspiration:"Personal Use",budget:"60 Lakh",source:"Walk-in",status:"Revisited",visitsCount:1,propertyName:"Luxury Empire",remarks:"Revisited sample flat with parents. Finalizing unit preference between floor 8 and 14."},
-  {id:15,name:"Rajesh Khanna",date:getRelativeDateStr(11),phone:"+91 94444 55667",mail:"rajesh.k@email.com",address:"Dadar West",profession:"Business",interest:"SHOP",aspiration:"Investment",budget:"1.6 Cr",source:"Social Media Ad",status:"Booked",visitsCount:1,propertyName:"Veena Developer Pvt LTD",remarks:"Commercial shop 03 booked. Cheque cleared; allotment letter handed over."},
-  {id:16,name:"Sunita Rao",date:getRelativeDateStr(12),phone:"+91 93333 77889",mail:"sunita.r@email.com",address:"Chembur East",profession:"Professor",interest:"2BHK JODI",aspiration:"Personal Use",budget:"95 Lakh",source:"Existing Customer",status:"Visited",visitsCount:1,propertyName:"Park Solitaire",remarks:"Looking for contiguous jodi apartments. Requested combined floor layout diagram."},
-  {id:17,name:"Manish Malhotra",date:getRelativeDateStr(13),phone:"+91 92222 99001",mail:"manish.m@email.com",address:"Colaba, Mumbai",profession:"Designer",interest:"OFFICE",aspiration:"Personal Use",budget:"2.2 Cr",source:"Director Reference",status:"FollowUp",visitsCount:2,propertyName:"Veena Developer Pvt LTD",remarks:"Studio office design alignment discussion in progress with project architect."},
-  {id:18,name:"Pooja Hegde",date:getRelativeDateStr(14),phone:"+91 91111 22334",mail:"pooja.h@email.com",address:"Santacruz West",profession:"Media",interest:"3BHK",aspiration:"Personal Use",budget:"1.4 Cr",source:"Outdoor Banner",status:"Closed",visitsCount:1,propertyName:"Other",remarks:"Sale deed executed and keys handed over. Very happy with sales team assistance."}
-];
+export const seedVisits = [];
 
-const seedKey = "park-solitaire-visits-v14";
+export function getTestFixtureVisits() {
+  return [
+    {id:1,name:"Rahul Sharma",date:getRelativeDateStr(0),phone:"+91 98765 43210",mail:"rahul.s@email.com",address:"Andheri West, Mumbai",profession:"Business",interest:"2BHK",aspiration:"Personal Use",budget:"45 Lakh",source:"Walk-in",status:"Visited",visitsCount:1,propertyName:"Park Solitaire",remarks:"Client showed keen interest in east-facing 2BHK on higher floor. Loan eligibility check underway."},
+    {id:2,name:"Priya Patel",date:getRelativeDateStr(0),phone:"+91 87654 32109",mail:"priya.p@email.com",address:"Bandra East, Mumbai",profession:"Doctor",interest:"3BHK",aspiration:"Investment",budget:"1.2 Cr",source:"Website",status:"FollowUp",followUpDate:getRelativeDateStr(0),visitsCount:2,propertyName:"Park Solitaire",remarks:"Requested detailed rental yield analysis and construction milestone schedule. Follow-up call on Tuesday."},
+    {id:3,name:"Amit Verma",date:getRelativeDateStr(1),phone:"+91 99887 66554",mail:"amit.v@email.com",address:"Thane West",profession:"Service",interest:"SHOP",aspiration:"Investment",budget:"75 Lakh",source:"Website",status:"Revisited",revisitDate:getRelativeDateStr(0),visitsCount:1,propertyName:"Veena Developer Pvt LTD",remarks:"Revisited the ground floor retail arcade with his business partner. Discussing corner shop options."},
+    {id:4,name:"Sneha Reddy",date:getRelativeDateStr(1),phone:"+91 91234 56789",mail:"sneha.r@email.com",address:"Powai, Mumbai",profession:"Teacher",interest:"2BHK JODI",aspiration:"Personal Use",budget:"90 Lakh",source:"Director Reference",status:"Booked",visitsCount:1,propertyName:"Park Solitaire",remarks:"Booking token received. Unit 1204 reserved; KYC documents collected for agreement draft."},
+    {id:5,name:"Vikram Singh",date:getRelativeDateStr(1),phone:"+91 98123 45678",mail:"vikram.s@email.com",address:"Lower Parel",profession:"Business",interest:"OFFICE",aspiration:"Investment",budget:"1.5 Cr",source:"Outdoor Banner",status:"FollowUp",visitsCount:3,propertyName:"Veena Developer Pvt LTD",remarks:"Examining floor layout options for 40-seat commercial office. Second meeting with legal advisor set."},
+    {id:6,name:"Ananya Joshi",date:getRelativeDateStr(2),phone:"+91 90011 22334",mail:"ananya.j@email.com",address:"Malad West",profession:"CA",interest:"1BHK",aspiration:"Personal Use",budget:"35 Lakh",source:"Pamphlet",status:"Visited",visitsCount:1,propertyName:"Park Solitaire",remarks:"First visit completed. Appreciated modern amenities and road connectivity. Discussing budget with family."},
+    {id:7,name:"Rohan Mehta",date:getRelativeDateStr(3),phone:"+91 95555 11223",mail:"rohan.m@email.com",address:"Navi Mumbai",profession:"Engineer",interest:"2BHK",aspiration:"Personal Use",budget:"55 Lakh",source:"Website",status:"Revisited",visitsCount:2,propertyName:"Park Solitaire",remarks:"Second walkthrough completed. Very satisfied with clubhouse design and podium parking layout."},
+    {id:8,name:"Kavita Nair",date:getRelativeDateStr(4),phone:"+91 94444 77889",mail:"kavita.n@email.com",address:"Goregaon East",profession:"Homemaker",interest:"3BHK",aspiration:"Personal Use",budget:"1.1 Cr",source:"Existing Customer",status:"Closed",visitsCount:1,propertyName:"Park Solitaire",remarks:"Registration completed at sub-registrar office. Welcome kit delivered to client."},
+    {id:9,name:"Suresh Kumar",date:getRelativeDateStr(5),phone:"+91 93333 44556",mail:"suresh.k@email.com",address:"Vashi, Navi Mumbai",profession:"Business",interest:"JODI SHOPS",aspiration:"Investment",budget:"2 Cr",source:"Channel Partner",status:"Visited",visitsCount:1,propertyName:"Veena Developer Pvt LTD",remarks:"Inquired about multi-brand retail possibilities on frontage area. Proposal sent via email."},
+    {id:10,name:"Meera Iyer",date:getRelativeDateStr(6),phone:"+91 96666 55443",mail:"meera.i@email.com",address:"Worli, Mumbai",profession:"Lawyer",interest:"3BHK",aspiration:"Investment",budget:"1.8 Cr",source:"Director Reference",status:"FollowUp",visitsCount:1,propertyName:"Luxury Empire",remarks:"Reviewed luxury specifications. Waiting for customized flexi-payment scheme approval."},
+    {id:11,name:"Arjun Kapoor",date:getRelativeDateStr(7),phone:"+91 98888 12345",mail:"arjun.k@email.com",address:"Juhu, Mumbai",profession:"Architect",interest:"2BHK",aspiration:"Personal Use",budget:"85 Lakh",source:"Walk-in",status:"Visited",visitsCount:1,propertyName:"Park Solitaire",remarks:"Studied architectural floor plans. Interested in high ceiling height on tower 2."},
+    {id:12,name:"Deepa Shah",date:getRelativeDateStr(8),phone:"+91 97777 98765",mail:"deepa.s@email.com",address:"Borivali West",profession:"Consultant",interest:"1BHK",aspiration:"Personal Use",budget:"42 Lakh",source:"Website",status:"Visited",visitsCount:1,propertyName:"Luxury Empire",remarks:"Looking for ready-to-move or near-possession timeline. Follow up in two days."},
+    {id:13,name:"Karan Johar",date:getRelativeDateStr(9),phone:"+91 96666 11223",mail:"karan.j@email.com",address:"Bandra West",profession:"Producer",interest:"OFFICE",aspiration:"Investment",budget:"3.5 Cr",source:"Channel Partner",status:"FollowUp",visitsCount:2,propertyName:"Luxury Empire",remarks:"Requested penthouse office availability with private elevator access."},
+    {id:14,name:"Neha Sharma",date:getRelativeDateStr(10),phone:"+91 95555 33445",mail:"neha.s@email.com",address:"Kandivali East",profession:"Dentist",interest:"2BHK",aspiration:"Personal Use",budget:"60 Lakh",source:"Walk-in",status:"Revisited",visitsCount:1,propertyName:"Luxury Empire",remarks:"Revisited sample flat with parents. Finalizing unit preference between floor 8 and 14."},
+    {id:15,name:"Rajesh Khanna",date:getRelativeDateStr(11),phone:"+91 94444 55667",mail:"rajesh.k@email.com",address:"Dadar West",profession:"Business",interest:"SHOP",aspiration:"Investment",budget:"1.6 Cr",source:"Social Media Ad",status:"Booked",visitsCount:1,propertyName:"Veena Developer Pvt LTD",remarks:"Commercial shop 03 booked. Cheque cleared; allotment letter handed over."},
+    {id:16,name:"Sunita Rao",date:getRelativeDateStr(12),phone:"+91 93333 77889",mail:"sunita.r@email.com",address:"Chembur East",profession:"Professor",interest:"2BHK JODI",aspiration:"Personal Use",budget:"95 Lakh",source:"Existing Customer",status:"Visited",visitsCount:1,propertyName:"Park Solitaire",remarks:"Looking for contiguous jodi apartments. Requested combined floor layout diagram."},
+    {id:17,name:"Manish Malhotra",date:getRelativeDateStr(13),phone:"+91 92222 99001",mail:"manish.m@email.com",address:"Colaba, Mumbai",profession:"Designer",interest:"OFFICE",aspiration:"Personal Use",budget:"2.2 Cr",source:"Director Reference",status:"FollowUp",visitsCount:2,propertyName:"Veena Developer Pvt LTD",remarks:"Studio office design alignment discussion in progress with project architect."},
+    {id:18,name:"Pooja Hegde",date:getRelativeDateStr(14),phone:"+91 91111 22334",mail:"pooja.h@email.com",address:"Santacruz West",profession:"Media",interest:"3BHK",aspiration:"Personal Use",budget:"1.4 Cr",source:"Outdoor Banner",status:"Closed",visitsCount:1,propertyName:"Other",remarks:"Sale deed executed and keys handed over. Very happy with sales team assistance."}
+  ];
+}
+
+export const seedKey = "mudita_crm_visits_v1";
 const API_BASE = import.meta.env.VITE_API_URL || (typeof window !== "undefined" && window.location.port === "5173" ? `http://${window.location.hostname || "localhost"}:5001/api` : "/api");
 const RAILWAY_DIRECT_URL = import.meta.env.VITE_RAILWAY_URL || import.meta.env.VITE_BACKEND_URL || "https://park-solitaire-crm-production.up.railway.app/api";
 
@@ -352,32 +356,18 @@ export function resolvePropertyName(item, existingPrev) {
 function useVisits() {
   const [visits, setVisits] = useState(() => {
     try {
-      const saved = localStorage.getItem(seedKey) || localStorage.getItem("park-solitaire-visits-v13") || localStorage.getItem("park-solitaire-visits-v12") || localStorage.getItem("park-solitaire-visits-v11") || localStorage.getItem("park-solitaire-visits-v10") || localStorage.getItem("park-solitaire-visits");
+      const saved = localStorage.getItem(seedKey);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map(v => {
-            if (v.id >= 1 && v.id <= 18) {
-              const seed = seedVisits.find(s => s.id === v.id);
-              if (seed) return {
-                ...v,
-                date: seed.date,
-                followUpDate: seed.followUpDate || v.followUpDate,
-                revisitDate: seed.revisitDate || v.revisitDate,
-                propertyName: seed.propertyName || v.propertyName || "Park Solitaire"
-              };
-            }
-            if (v.id === 2) return { ...v, source: "Website", followUpDate: v.followUpDate || getRelativeDateStr(0), propertyName: v.propertyName || "Park Solitaire" };
-            if (v.id === 3) return { ...v, source: "Website", revisitDate: v.revisitDate || getRelativeDateStr(0), propertyName: v.propertyName || "Veena Developer Pvt LTD" };
-            return {
-              ...v,
-              propertyName: resolvePropertyName(v, null)
-            };
-          });
+          return parsed.map(v => ({
+            ...v,
+            propertyName: resolvePropertyName(v, null)
+          }));
         }
       }
-      return seedVisits;
-    } catch { return seedVisits; }
+      return [];
+    } catch { return []; }
   });
 
   useEffect(() => {
@@ -398,7 +388,9 @@ function useVisits() {
       const processJson = (json) => {
         if (active && json && Array.isArray(json.data) && json.data.length > 0) {
           setVisits((prev) => {
-            const normalized = json.data.map(item => {
+            const nonDemo = json.data.filter(item => !(typeof item.id === "number" && item.id >= 1 && item.id <= 18));
+            if (nonDemo.length === 0 && prev.length === 0) return prev;
+            const normalized = nonDemo.map(item => {
               const existingPrev = prev.find(p => p.id === item.id);
               const prop = resolvePropertyName(item, existingPrev);
               return {
@@ -474,140 +466,144 @@ function useVisits() {
   return [visits, setVisits];
 }
 
-export const seedSiteVisits = [
-  {
-    id: 1,
-    clientName: "Vikram Malhotra",
-    phone: "+91 98200 98200",
-    propertyName: "Park Solitaire",
-    visitDate: getRelativeDateStr(0),
-    visitTime: "11:00 AM",
-    salesperson: "Rohan Deshmukh",
-    status: "Confirmed",
-    feedback: "Interested in 3BHK higher floor east-facing. Loan eligibility calculation underway.",
-    nextFollowUpDate: getRelativeDateStr(-2),
-    notes: "Arriving with family; arrange sample flat walkthrough on 14th floor."
-  },
-  {
-    id: 2,
-    clientName: "Rajesh Singhania",
-    phone: "+91 98223 34455",
-    propertyName: "VDPL",
-    visitDate: getRelativeDateStr(0),
-    visitTime: "02:30 PM",
-    salesperson: "Pooja Sharma",
-    status: "Scheduled",
-    feedback: "",
-    nextFollowUpDate: getRelativeDateStr(-1),
-    notes: "Front-facing retail shop inspection. Client has pre-approved commercial loan."
-  },
-  {
-    id: 3,
-    clientName: "Meera Kapoor",
-    phone: "+91 98334 55667",
-    propertyName: "Luxury Empire",
-    visitDate: getRelativeDateStr(0),
-    visitTime: "04:30 PM",
-    salesperson: "Aditya Mehta",
-    status: "Confirmed",
-    feedback: "Impressed by private elevator lobby and duplex layout.",
-    nextFollowUpDate: getRelativeDateStr(-3),
-    notes: "VIP client; prepare detailed penthouse specification brochure."
-  },
-  {
-    id: 4,
-    clientName: "Sunita Joshi",
-    phone: "+91 97665 43210",
-    propertyName: "Park Solitaire",
-    visitDate: getRelativeDateStr(-1),
-    visitTime: "10:30 AM",
-    salesperson: "Rohan Deshmukh",
-    status: "Scheduled",
-    feedback: "",
-    nextFollowUpDate: getRelativeDateStr(-4),
-    notes: "Looking for 2BHK Jodi apartment for senior citizen parents."
-  },
-  {
-    id: 5,
-    clientName: "Amit Patel",
-    phone: "+91 99887 66554",
-    propertyName: "VDPL",
-    visitDate: getRelativeDateStr(-1),
-    visitTime: "03:00 PM",
-    salesperson: "Vikram Deshmukh",
-    status: "Rescheduled",
-    feedback: "Rescheduled from Monday due to business travel.",
-    nextFollowUpDate: getRelativeDateStr(-3),
-    notes: "40-seat commercial office floorplate discussion."
-  },
-  {
-    id: 6,
-    clientName: "Dr. Sanjay Verma",
-    phone: "+91 98112 23344",
-    propertyName: "Luxury Empire",
-    visitDate: getRelativeDateStr(1),
-    visitTime: "05:00 PM",
-    salesperson: "Aditya Mehta",
-    status: "Completed",
-    feedback: "Loved the double-height ceiling and duplex terrace. Requested payment milestone plan.",
-    nextFollowUpDate: getRelativeDateStr(-2),
-    notes: "Met with lead architect; discussion on customized interior finishes."
-  },
-  {
-    id: 7,
-    clientName: "Ananya Rao",
-    phone: "+91 91234 56789",
-    propertyName: "Park Solitaire",
-    visitDate: getRelativeDateStr(2),
-    visitTime: "11:30 AM",
-    salesperson: "Pooja Sharma",
-    status: "Completed",
-    feedback: "Token advance discussion ongoing for 2BHK Jodi apartment 1102. Bank NOC pending.",
-    nextFollowUpDate: getRelativeDateStr(0),
-    notes: "Client requested follow-up today regarding stamp duty discount approval."
-  },
-  {
-    id: 8,
-    clientName: "Harish Mehta",
-    phone: "+91 94444 55667",
-    propertyName: "VDPL",
-    visitDate: getRelativeDateStr(3),
-    visitTime: "01:00 PM",
-    salesperson: "Vikram Deshmukh",
-    status: "Completed",
-    feedback: "Corner retail shop finalized. Cheque collected; KYC documents under review.",
-    nextFollowUpDate: getRelativeDateStr(0),
-    notes: "Follow up today on allotment letter issuance."
-  },
-  {
-    id: 9,
-    clientName: "Ritu Sengupta",
-    phone: "+91 90011 22334",
-    propertyName: "Park Solitaire",
-    visitDate: getRelativeDateStr(1),
-    visitTime: "03:30 PM",
-    salesperson: "Rohan Deshmukh",
-    status: "No-show",
-    feedback: "Client had urgent medical emergency; requested call back to reschedule.",
-    nextFollowUpDate: getRelativeDateStr(0),
-    notes: "Follow up today to reschedule for this weekend."
-  },
-  {
-    id: 10,
-    clientName: "Karan Johar",
-    phone: "+91 96666 11223",
-    propertyName: "Luxury Empire",
-    visitDate: getRelativeDateStr(-2),
-    visitTime: "04:00 PM",
-    salesperson: "Aditya Mehta",
-    status: "Scheduled",
-    feedback: "",
-    nextFollowUpDate: getRelativeDateStr(-5),
-    notes: "Sky penthouse walkthrough with structural consultant."
-  }
-];
+export const seedSiteVisits = [];
 
-const siteVisitsKey = "park-solitaire-site-visits-v1";
+export function getTestFixtureSiteVisits() {
+  return [
+    {
+      id: 1,
+      clientName: "Vikram Malhotra",
+      phone: "+91 98200 98200",
+      propertyName: "Park Solitaire",
+      visitDate: getRelativeDateStr(0),
+      visitTime: "11:00 AM",
+      salesperson: "Rohan Deshmukh",
+      status: "Confirmed",
+      feedback: "Interested in 3BHK higher floor east-facing. Loan eligibility calculation underway.",
+      nextFollowUpDate: getRelativeDateStr(-2),
+      notes: "Arriving with family; arrange sample flat walkthrough on 14th floor."
+    },
+    {
+      id: 2,
+      clientName: "Rajesh Singhania",
+      phone: "+91 98223 34455",
+      propertyName: "VDPL",
+      visitDate: getRelativeDateStr(0),
+      visitTime: "02:30 PM",
+      salesperson: "Pooja Sharma",
+      status: "Scheduled",
+      feedback: "",
+      nextFollowUpDate: getRelativeDateStr(-1),
+      notes: "Front-facing retail shop inspection. Client has pre-approved commercial loan."
+    },
+    {
+      id: 3,
+      clientName: "Meera Kapoor",
+      phone: "+91 98334 55667",
+      propertyName: "Luxury Empire",
+      visitDate: getRelativeDateStr(0),
+      visitTime: "04:30 PM",
+      salesperson: "Aditya Mehta",
+      status: "Confirmed",
+      feedback: "Impressed by private elevator lobby and duplex layout.",
+      nextFollowUpDate: getRelativeDateStr(-3),
+      notes: "VIP client; prepare detailed penthouse specification brochure."
+    },
+    {
+      id: 4,
+      clientName: "Sunita Joshi",
+      phone: "+91 97665 43210",
+      propertyName: "Park Solitaire",
+      visitDate: getRelativeDateStr(-1),
+      visitTime: "10:30 AM",
+      salesperson: "Rohan Deshmukh",
+      status: "Scheduled",
+      feedback: "",
+      nextFollowUpDate: getRelativeDateStr(-4),
+      notes: "Looking for 2BHK Jodi apartment for senior citizen parents."
+    },
+    {
+      id: 5,
+      clientName: "Amit Patel",
+      phone: "+91 99887 66554",
+      propertyName: "VDPL",
+      visitDate: getRelativeDateStr(-1),
+      visitTime: "03:00 PM",
+      salesperson: "Vikram Deshmukh",
+      status: "Rescheduled",
+      feedback: "Rescheduled from Monday due to business travel.",
+      nextFollowUpDate: getRelativeDateStr(-3),
+      notes: "40-seat commercial office floorplate discussion."
+    },
+    {
+      id: 6,
+      clientName: "Dr. Sanjay Verma",
+      phone: "+91 98112 23344",
+      propertyName: "Luxury Empire",
+      visitDate: getRelativeDateStr(1),
+      visitTime: "05:00 PM",
+      salesperson: "Aditya Mehta",
+      status: "Completed",
+      feedback: "Loved the double-height ceiling and duplex terrace. Requested payment milestone plan.",
+      nextFollowUpDate: getRelativeDateStr(-2),
+      notes: "Met with lead architect; discussion on customized interior finishes."
+    },
+    {
+      id: 7,
+      clientName: "Ananya Rao",
+      phone: "+91 91234 56789",
+      propertyName: "Park Solitaire",
+      visitDate: getRelativeDateStr(2),
+      visitTime: "11:30 AM",
+      salesperson: "Pooja Sharma",
+      status: "Completed",
+      feedback: "Token advance discussion ongoing for 2BHK Jodi apartment 1102. Bank NOC pending.",
+      nextFollowUpDate: getRelativeDateStr(0),
+      notes: "Client requested follow-up today regarding stamp duty discount approval."
+    },
+    {
+      id: 8,
+      clientName: "Harish Mehta",
+      phone: "+91 94444 55667",
+      propertyName: "VDPL",
+      visitDate: getRelativeDateStr(3),
+      visitTime: "01:00 PM",
+      salesperson: "Vikram Deshmukh",
+      status: "Completed",
+      feedback: "Corner retail shop finalized. Cheque collected; KYC documents under review.",
+      nextFollowUpDate: getRelativeDateStr(0),
+      notes: "Follow up today on allotment letter issuance."
+    },
+    {
+      id: 9,
+      clientName: "Ritu Sengupta",
+      phone: "+91 90011 22334",
+      propertyName: "Park Solitaire",
+      visitDate: getRelativeDateStr(1),
+      visitTime: "03:30 PM",
+      salesperson: "Rohan Deshmukh",
+      status: "No-show",
+      feedback: "Client had urgent medical emergency; requested call back to reschedule.",
+      nextFollowUpDate: getRelativeDateStr(0),
+      notes: "Follow up today to reschedule for this weekend."
+    },
+    {
+      id: 10,
+      clientName: "Karan Johar",
+      phone: "+91 96666 11223",
+      propertyName: "Luxury Empire",
+      visitDate: getRelativeDateStr(-2),
+      visitTime: "04:00 PM",
+      salesperson: "Aditya Mehta",
+      status: "Scheduled",
+      feedback: "",
+      nextFollowUpDate: getRelativeDateStr(-5),
+      notes: "Sky penthouse walkthrough with structural consultant."
+    }
+  ];
+}
+
+export const siteVisitsKey = "mudita_crm_site_visits_v1";
 
 export function useSiteVisits() {
   const [siteVisits, setSiteVisits] = useState(() => {
@@ -618,7 +614,7 @@ export function useSiteVisits() {
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch {}
-    return seedSiteVisits;
+    return [];
   });
 
   useEffect(() => {
@@ -634,7 +630,10 @@ export function useSiteVisits() {
         .then(res => res.ok ? res.json() : null)
         .then(json => {
           if (active && json && Array.isArray(json.data) && json.data.length > 0) {
-            setSiteVisits(json.data);
+            const nonDemo = json.data.filter(sv => !(typeof sv.id === "number" && sv.id >= 1 && sv.id <= 10));
+            if (nonDemo.length > 0) {
+              setSiteVisits(nonDemo);
+            }
           }
         })
         .catch(() => {});

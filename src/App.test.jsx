@@ -2,11 +2,13 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, beforeEach } from 'vitest';
-import App from './App';
+import App, { getTestFixtureVisits, getTestFixtureSiteVisits, seedKey, siteVisitsKey } from './App';
 
 describe('Park Solitaire Client Visit App', () => {
   beforeEach(() => {
     localStorage.clear();
+    localStorage.setItem(seedKey, JSON.stringify(getTestFixtureVisits()));
+    localStorage.setItem(siteVisitsKey, JSON.stringify(getTestFixtureSiteVisits()));
   });
 
   describe('Branding and Initial Navigation', () => {
@@ -1222,6 +1224,8 @@ describe('Park Solitaire Client Visit App', () => {
   describe('Visited Client Calendar Reminders (Admin & Property Desk)', () => {
     beforeEach(() => {
       localStorage.clear();
+      localStorage.setItem(seedKey, JSON.stringify(getTestFixtureVisits()));
+      localStorage.setItem(siteVisitsKey, JSON.stringify(getTestFixtureSiteVisits()));
     });
 
     it('renders visited client reminders (Follow-Up, Re-visit, Booked) on the calendar for admin', () => {
@@ -1326,7 +1330,98 @@ describe('Park Solitaire Client Visit App', () => {
       expect(screen.getByRole('button', { name: /Save Reminder/i })).toBeInTheDocument();
     });
   });
+
+  describe('Production Clean Slate & Empty State Verification', () => {
+    beforeEach(() => {
+      localStorage.clear();
+      localStorage.setItem(seedKey, '[]');
+      localStorage.setItem(siteVisitsKey, '[]');
+    });
+
+    it('renders clean empty state on Dashboard when no visits exist', () => {
+      render(
+        <MemoryRouter initialEntries={['/admin']}>
+          <App />
+        </MemoryRouter>
+      );
+
+      // Metric numbers should show 0
+      const summaryNumbers = screen.getAllByText('0');
+      expect(summaryNumbers.length).toBeGreaterThanOrEqual(4);
+
+      // Empty state text
+      expect(screen.getByText(/No visits recorded/i)).toBeInTheDocument();
+      expect(screen.getByText(/All historical client visits are stored in the All Visits section/i)).toBeInTheDocument();
+    });
+
+    it('renders clean empty state in All Visits view when no visits exist', () => {
+      render(
+        <MemoryRouter initialEntries={['/visits']}>
+          <App />
+        </MemoryRouter>
+      );
+
+      expect(screen.getByText('0 records')).toBeInTheDocument();
+      expect(screen.getByText(/No matching visits found/i)).toBeInTheDocument();
+    });
+
+    it('renders clean empty state in Clients view when no clients exist', () => {
+      render(
+        <MemoryRouter initialEntries={['/clients']}>
+          <App />
+        </MemoryRouter>
+      );
+
+      expect(screen.getByText(/No matching clients found/i)).toBeInTheDocument();
+    });
+
+    it('renders clean empty state in Site Visits upcoming tab when no visits exist', () => {
+      render(
+        <MemoryRouter initialEntries={['/site-visits']}>
+          <App />
+        </MemoryRouter>
+      );
+
+      const upcomingTab = screen.getByRole('button', { name: /Upcoming Visits/i });
+      fireEvent.click(upcomingTab);
+      expect(screen.getByText(/No upcoming site visits scheduled/i)).toBeInTheDocument();
+    });
+
+    it('allows a brand new walk-in visit to be submitted and displays as the sole entry', async () => {
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <App />
+        </MemoryRouter>
+      );
+
+      // Fill in real production walk-in entry
+      const nameInput = screen.getByPlaceholderText('Enter first name');
+      const phoneInput = screen.getByPlaceholderText('10-digit number');
+
+      fireEvent.change(nameInput, { target: { value: 'Kavish Mehta' } });
+      fireEvent.change(phoneInput, { target: { value: '9820112233' } });
+
+      // Submit
+      const submitBtn = screen.getByRole('button', { name: /submit/i });
+      fireEvent.click(submitBtn);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Thank you for visiting/i)).toBeInTheDocument();
+        expect(screen.getByText('Kavish Mehta')).toBeInTheDocument();
+      });
+
+      // Go to dashboard
+      const dashBtn = screen.getByRole('button', { name: /Go to Dashboard/i });
+      fireEvent.click(dashBtn);
+
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { level: 1, name: /Dashboard/i })).toBeInTheDocument();
+        expect(screen.getByText('Kavish Mehta')).toBeInTheDocument();
+      });
+    });
+  });
 });
+
 
 
 

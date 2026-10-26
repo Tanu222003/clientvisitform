@@ -351,38 +351,7 @@ export async function initDb() {
       const total = Number(countRes.rows[0].total);
 
       if (total === 0) {
-        let seeds = [];
-        if (fs.existsSync(dataFilePath)) {
-          try {
-            const raw = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
-            if (Array.isArray(raw) && raw.length > 0) seeds = raw;
-          } catch {}
-        }
-        if (seeds.length === 0) {
-          seeds = generateSeedVisits();
-        }
-        console.log(`🌱 Seeding initial ${seeds.length} clients across properties into Railway PostgreSQL...`);
-        for (const s of seeds) {
-          await client.query(`
-            INSERT INTO visits (
-              id, name, date, phone, mail, address, profession, interest,
-              aspiration, budget, source, status, visits_count, remarks,
-              follow_up_date, revisit_date, cp, remarks_history, property_name, created_at, updated_at
-            ) VALUES (
-              $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,
-              $15, $16, $17, $18, $19, $20, $21
-            );
-          `, [
-            s.id, s.name, s.date, s.phone, s.mail || '', s.address || '', s.profession || '—',
-            s.interest || '2BHK', s.aspiration || 'Personal Use', s.budget || '—',
-            s.source || 'Walk-in', s.status || 'Visited', s.visitsCount || 1, s.remarks || '',
-            s.followUpDate || null, s.revisitDate || null, s.cp || '',
-            JSON.stringify(s.remarksHistory || []),
-            s.propertyName || 'Park Solitaire',
-            s.createdAt || new Date().toISOString(), s.updatedAt || new Date().toISOString()
-          ]);
-        }
-        console.log('✅ Railway PostgreSQL seeded visits successfully!');
+        console.log(`ℹ️ Railway PostgreSQL connected (visits table is ready and clean for production).`);
       } else {
         console.log(`✅ Railway PostgreSQL connected with ${total} visits.`);
       }
@@ -392,34 +361,7 @@ export async function initDb() {
       const siteTotal = Number(siteCountRes.rows[0].total);
 
       if (siteTotal === 0) {
-        let siteSeeds = [];
-        if (fs.existsSync(siteVisitsFilePath)) {
-          try {
-            const raw = JSON.parse(fs.readFileSync(siteVisitsFilePath, 'utf8'));
-            if (Array.isArray(raw) && raw.length > 0) siteSeeds = raw;
-          } catch {}
-        }
-        if (siteSeeds.length === 0) {
-          siteSeeds = generateSeedSiteVisits();
-        }
-        console.log(`🌱 Seeding initial ${siteSeeds.length} site visits into Railway PostgreSQL...`);
-        for (const s of siteSeeds) {
-          await client.query(`
-            INSERT INTO site_visits (
-              id, client_name, phone, property_name, visit_date, visit_time,
-              salesperson, status, feedback, next_follow_up_date, notes,
-              created_at, updated_at
-            ) VALUES (
-              $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
-            );
-          `, [
-            s.id, s.clientName, s.phone, s.propertyName || 'Park Solitaire',
-            s.visitDate, s.visitTime || '', s.salesperson || '', s.status || 'Scheduled',
-            s.feedback || '', s.nextFollowUpDate || null, s.notes || '',
-            s.createdAt || new Date().toISOString(), s.updatedAt || new Date().toISOString()
-          ]);
-        }
-        console.log('✅ Railway PostgreSQL seeded site visits successfully!');
+        console.log(`ℹ️ Railway PostgreSQL connected (site_visits table is ready and clean for production).`);
       } else {
         console.log(`✅ Railway PostgreSQL connected with ${siteTotal} site visits.`);
       }
@@ -430,12 +372,10 @@ export async function initDb() {
     // Local File Storage initialization
     console.log(`📁 Using Local File Database: ${dataFilePath}`);
     if (!fs.existsSync(dataFilePath)) {
-      const seeds = generateSeedVisits();
-      fs.writeFileSync(dataFilePath, JSON.stringify(seeds, null, 2), 'utf8');
+      fs.writeFileSync(dataFilePath, '[]', 'utf8');
     }
     if (!fs.existsSync(siteVisitsFilePath)) {
-      const siteSeeds = generateSeedSiteVisits();
-      fs.writeFileSync(siteVisitsFilePath, JSON.stringify(siteSeeds, null, 2), 'utf8');
+      fs.writeFileSync(siteVisitsFilePath, '[]', 'utf8');
     }
   }
 }
@@ -447,37 +387,21 @@ export async function getAllVisits() {
     return res.rows.map(mapRowToVisit);
   } else {
     try {
-      const seeds = generateSeedVisits();
       if (!fs.existsSync(dataFilePath)) {
-        fs.writeFileSync(dataFilePath, JSON.stringify(seeds, null, 2), 'utf8');
-        return seeds;
+        fs.writeFileSync(dataFilePath, '[]', 'utf8');
+        return [];
       }
       const data = fs.readFileSync(dataFilePath, 'utf8');
       const parsed = JSON.parse(data);
-      if (!Array.isArray(parsed) || parsed.length === 0) {
-        return seeds;
+      if (!Array.isArray(parsed)) {
+        return [];
       }
-      // Ensure seed visits retain current relative dates
-      return parsed.map(v => {
-        if (v.id >= 1 && v.id <= 18) {
-          const seed = seeds.find(s => s.id === v.id);
-          if (seed) {
-            return {
-              ...v,
-              date: seed.date,
-              followUpDate: seed.followUpDate || v.followUpDate,
-              revisitDate: seed.revisitDate || v.revisitDate,
-              propertyName: seed.propertyName || v.propertyName || 'Park Solitaire'
-            };
-          }
-        }
-        return {
-          ...v,
-          propertyName: v.propertyName || 'Park Solitaire'
-        };
-      });
+      return parsed.map(v => ({
+        ...v,
+        propertyName: v.propertyName || 'Park Solitaire'
+      }));
     } catch {
-      return generateSeedVisits();
+      return [];
     }
   }
 }
@@ -639,31 +563,18 @@ export async function getAllSiteVisits() {
     return res.rows.map(mapRowToSiteVisit);
   } else {
     try {
-      const seeds = generateSeedSiteVisits();
       if (!fs.existsSync(siteVisitsFilePath)) {
-        fs.writeFileSync(siteVisitsFilePath, JSON.stringify(seeds, null, 2), 'utf8');
-        return seeds;
+        fs.writeFileSync(siteVisitsFilePath, '[]', 'utf8');
+        return [];
       }
       const data = fs.readFileSync(siteVisitsFilePath, 'utf8');
       const parsed = JSON.parse(data);
-      if (!Array.isArray(parsed) || parsed.length === 0) {
-        return seeds;
+      if (!Array.isArray(parsed)) {
+        return [];
       }
-      return parsed.map(v => {
-        if (v.id >= 1 && v.id <= 10) {
-          const seed = seeds.find(s => s.id === v.id);
-          if (seed) {
-            return {
-              ...v,
-              visitDate: seed.visitDate,
-              nextFollowUpDate: seed.nextFollowUpDate || v.nextFollowUpDate
-            };
-          }
-        }
-        return v;
-      });
+      return parsed;
     } catch {
-      return generateSeedSiteVisits();
+      return [];
     }
   }
 }
