@@ -3,7 +3,7 @@ import { NavLink, Route, Routes, useNavigate } from "react-router-dom";
 import logoImg from "./assets/logo.png";
 import vdplLogoImg from "./assets/vdpl-logo.jpg";
 import luxuryLogoImg from "./assets/luxury-empire-logo.jpg";
-import muditaLogoImg from "./assets/mudita-logo.jpg";
+import muditaLogoImg from "./assets/mudita-logo.png";
 import {
   BarChart3, Bell, Building2, CalendarDays, Check, ChevronDown,
   ClipboardList, Coins, Download, Edit3, FileText, Filter, Home, LayoutDashboard,
@@ -80,10 +80,11 @@ function isTodayOrYesterday(dateStr) {
 export const AVAILABLE_PROPERTIES = [
   {
     id: "mudita",
-    name: "Mudita",
+    name: "Mudita Builders and developers",
     shortName: "Mudita",
-    category: "Residential",
-    tagline: "Builders and Developers",
+    fullName: "Mudita Builders and developers",
+    category: "Residential & Commercial",
+    tagline: "Builders and developers",
     location: "Mumbai",
     accentColor: "#c29135",
     badgeClass: "badge-gold",
@@ -648,10 +649,10 @@ export function useSiteVisits() {
 function Logo() {
   return (
     <div className="brand">
-      <img src={logoImg} alt="Park Solitaire" className="brand-logo" />
+      <img src={muditaLogoImg} alt="Mudita Builders and developers" className="brand-logo" />
       <div>
-        <div className="brand-name">Park Solitaire</div>
-        <div className="brand-sub">Lifespaces LLP</div>
+        <div className="brand-name">Mudita</div>
+        <div className="brand-sub">Builders and developers</div>
       </div>
     </div>
   );
@@ -675,8 +676,8 @@ export function getPropertyLogo(propertyName) {
   const p = AVAILABLE_PROPERTIES.find(item => matchesProperty(item.name, propertyName));
   if (p && p.logo) return p.logo;
   const lower = String(propertyName).toLowerCase();
-  if (lower.includes("solitaire") || lower.includes("park") || lower.includes("lifespaces")) return logoImg;
   if (lower.includes("mudita")) return muditaLogoImg;
+  if (lower.includes("solitaire") || lower.includes("park") || lower.includes("lifespaces")) return logoImg;
   if (lower.includes("veena") || lower.includes("vdpl")) return vdplLogoImg;
   if (lower.includes("luxury") || lower.includes("empire")) return luxuryLogoImg;
   return null;
@@ -684,11 +685,12 @@ export function getPropertyLogo(propertyName) {
 
 function PropertyBrand({ propertyName, subtitle }) {
   const logo = getPropertyLogo(propertyName);
-  const displayName = propertyName || "Park Solitaire";
-  const isPark = displayName.toLowerCase().includes("park solitaire") || displayName.toLowerCase().includes("solitaire") || displayName.toLowerCase().includes("lifespaces");
-  const defaultSub = isPark ? "Lifespaces LLP" : (displayName === "Mudita" ? "Builders and Developers" : "Sales Desk");
+  const displayName = propertyName || "Mudita";
+  const isMudita = displayName.toLowerCase().includes("mudita");
+  const isPark = !isMudita && (displayName.toLowerCase().includes("park solitaire") || displayName.toLowerCase().includes("solitaire") || displayName.toLowerCase().includes("lifespaces"));
+  const defaultSub = isMudita ? "Builders and developers" : (isPark ? "Lifespaces LLP" : "Sales Desk");
   const finalSub = subtitle || defaultSub;
-  const brandTitle = isPark ? "Park Solitaire" : displayName;
+  const brandTitle = isMudita ? (displayName.includes("Builders") ? "Mudita" : displayName) : (isPark ? "Park Solitaire" : displayName);
   return (
     <div className="brand property-brand-wrapper">
       {logo ? (
@@ -708,7 +710,7 @@ function PropertyBrand({ propertyName, subtitle }) {
 
 function LoginScreen({ onLogin }) {
   const [tab, setTab] = useState("property");
-  const [selectedProperty, setSelectedProperty] = useState("Mudita");
+  const [selectedProperty, setSelectedProperty] = useState("Mudita Builders and developers");
   const [customPropertyName, setCustomPropertyName] = useState("");
   const [deskName, setDeskName] = useState("Sales Desk");
   const [pin, setPin] = useState("mudita123");

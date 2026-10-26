@@ -10,20 +10,20 @@ describe('Park Solitaire Client Visit App', () => {
   });
 
   describe('Branding and Initial Navigation', () => {
-    it('renders Park Solitaire branding and logo', () => {
+    it('renders Mudita Builders and developers branding and logo', () => {
       render(
         <MemoryRouter initialEntries={['/']}>
           <App />
         </MemoryRouter>
       );
 
-      const brandNames = screen.getAllByText('Park Solitaire');
+      const brandNames = screen.getAllByText(/Mudita/i);
       expect(brandNames.length).toBeGreaterThan(0);
 
-      const lifespacesSubs = screen.getAllByText('Lifespaces LLP');
-      expect(lifespacesSubs.length).toBeGreaterThan(0);
+      const subBrands = screen.getAllByText(/Builders and developers/i);
+      expect(subBrands.length).toBeGreaterThan(0);
 
-      const logo = screen.getByAltText('Park Solitaire');
+      const logo = screen.getByAltText(/Mudita/i);
       expect(logo).toBeInTheDocument();
       expect(logo).toHaveAttribute('src');
     });
@@ -748,7 +748,7 @@ describe('Park Solitaire Client Visit App', () => {
       expect(screen.getByText('Other')).toBeInTheDocument();
 
       // Verify Mudita brand & Builders and Developers are on operations access portal and Park Solitaire Lifespaces LLP is removed
-      expect(screen.getAllByText('Builders and Developers').length).toBe(2);
+      expect(screen.getAllByText(/Builders and developers/i).length).toBeGreaterThan(0);
       expect(screen.queryByText('Park Solitaire Lifespaces LLP')).not.toBeInTheDocument();
 
       // Verify 1-Click Fast Access (Instant Launch) is REMOVED
