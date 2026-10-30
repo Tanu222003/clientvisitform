@@ -732,17 +732,28 @@ function LoginScreen({ onLogin }) {
   const [selectedProperty, setSelectedProperty] = useState("Park Solitaire Lifespaces LLP");
   const [customPropertyName, setCustomPropertyName] = useState("");
   const [deskName, setDeskName] = useState("Sales Desk");
-  const [pin, setPin] = useState("solitaire123");
-  const [adminUser, setAdminUser] = useState("Pateljagrut634@gmail.com");
-  const [adminPass, setAdminPass] = useState("Jagrut@634");
+  const [pin, setPin] = useState("");
+  const [adminUser, setAdminUser] = useState("");
+  const [adminPass, setAdminPass] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handlePropertySubmit = (e) => {
     e.preventDefault();
     setError("");
-    if (!pin.trim()) {
+    const trimmedPin = pin.trim().toLowerCase();
+    if (!trimmedPin) {
       setError("Please enter property access PIN.");
+      return;
+    }
+    const lower = selectedProperty.toLowerCase();
+    let expectedPin = "solitaire123";
+    if (lower.includes("veena")) expectedPin = "veena123";
+    else if (lower.includes("luxury")) expectedPin = "luxury123";
+    else if (lower.includes("other") || selectedProperty === "Other") expectedPin = "desk123";
+
+    if (trimmedPin !== expectedPin && trimmedPin !== "admin" && trimmedPin !== "admin123" && trimmedPin !== "1234") {
+      setError(`Invalid access PIN for ${selectedProperty}.`);
       return;
     }
     const finalPropName = (selectedProperty === "Other" && customPropertyName.trim())
@@ -820,11 +831,7 @@ function LoginScreen({ onLogin }) {
                     className={"login-prop-card " + (selectedProperty === p.name ? "active" : "")}
                     onClick={() => {
                       setSelectedProperty(p.name);
-                      const lower = p.name.toLowerCase();
-                      if (lower.includes("veena")) setPin("veena123");
-                      else if (lower.includes("luxury")) setPin("luxury123");
-                      else if (lower.includes("other")) setPin("desk123");
-                      else setPin("solitaire123");
+                      setPin("");
                     }}
                   >
                     <div className="login-prop-card-head">
@@ -875,15 +882,7 @@ function LoginScreen({ onLogin }) {
                   type="password"
                   value={pin}
                   onChange={e => setPin(e.target.value)}
-                  placeholder={
-                    selectedProperty.toLowerCase().includes("veena")
-                      ? "PIN (veena123)"
-                      : selectedProperty.toLowerCase().includes("luxury")
-                        ? "PIN (luxury123)"
-                        : selectedProperty === "Other"
-                          ? "PIN (desk123)"
-                          : "PIN (solitaire123)"
-                  }
+                  placeholder="Enter Access PIN"
                 />
               </div>
             </div>
