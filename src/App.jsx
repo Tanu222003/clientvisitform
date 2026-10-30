@@ -826,7 +826,6 @@ function LoginScreen({ onLogin }) {
                     </div>
                     <h4>{p.name}</h4>
                     <p>{p.tagline}</p>
-                    <small>{p.location}</small>
                   </div>
                 ))}
               </div>
@@ -2692,9 +2691,9 @@ function ScheduleSiteVisitModal({ isOpen, onClose, onSave, defaultDate = "" }) {
                 />
               ) : (
                 <select value={propertyName} onChange={e => setPropertyName(e.target.value)}>
-                  <option value="Park Solitaire">Park Solitaire (Andheri West)</option>
+                  <option value="Park Solitaire">Park Solitaire</option>
                   <option value="VDPL">VDPL (Commercial & Mixed Use)</option>
-                  <option value="Luxury Empire">Luxury Empire (Worli Penthouses)</option>
+                  <option value="Luxury Empire">Luxury Empire</option>
                 </select>
               )}
             </div>
@@ -5079,9 +5078,9 @@ function AddClientModal({ isOpen, onClose, onSave, defaultProperty = "Park Solit
             <div className="client-form-field">
               <label>Assigned Property *</label>
               <select value={propertyName} onChange={e => setPropertyName(e.target.value)}>
-                <option value="Park Solitaire">Park Solitaire (Andheri West)</option>
+                <option value="Park Solitaire">Park Solitaire</option>
                 <option value="VDPL">VDPL (Veena Developer Pvt LTD)</option>
-                <option value="Luxury Empire">Luxury Empire (Worli)</option>
+                <option value="Luxury Empire">Luxury Empire</option>
                 <option value="Other">Other</option>
               </select>
             </div>
@@ -5277,9 +5276,9 @@ function EditClientModal({ client, isOpen, onClose, onSave }) {
             <div className="client-form-field">
               <label>Assigned Property *</label>
               <select value={propertyName} onChange={e => setPropertyName(e.target.value)}>
-                <option value="Park Solitaire">Park Solitaire (Andheri West)</option>
+                <option value="Park Solitaire">Park Solitaire</option>
                 <option value="VDPL">VDPL (Veena Developer Pvt LTD)</option>
-                <option value="Luxury Empire">Luxury Empire (Worli)</option>
+                <option value="Luxury Empire">Luxury Empire</option>
                 <option value="Other">Other</option>
               </select>
             </div>
