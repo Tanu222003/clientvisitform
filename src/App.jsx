@@ -772,7 +772,7 @@ function LoginScreen({ onLogin }) {
     const isMasterUser = inputUser === "pateljagrut634@gmail.com" || inputUser === "admin";
     const isMasterPass = adminPass === "Jagrut@634" || adminPass === "admin123" || adminPass === "admin";
     if (!isMasterUser || !isMasterPass) {
-      setError("Invalid admin credentials. Use Pateljagrut634@gmail.com / Jagrut@634");
+      setError("Invalid admin username or password.");
       return;
     }
     if (onLogin) {
@@ -900,7 +900,7 @@ function LoginScreen({ onLogin }) {
                 type="text"
                 value={adminUser}
                 onChange={e => setAdminUser(e.target.value)}
-                placeholder="Pateljagrut634@gmail.com"
+                placeholder="Enter admin username or email"
               />
             </div>
 
@@ -910,7 +910,7 @@ function LoginScreen({ onLogin }) {
                 type="password"
                 value={adminPass}
                 onChange={e => setAdminPass(e.target.value)}
-                placeholder="Password (Jagrut@634)"
+                placeholder="Enter admin password"
               />
             </div>
 

@@ -766,9 +766,9 @@ describe('Park Solitaire Client Visit App', () => {
       const adminTab = screen.getByRole('button', { name: /Master Admin Command/i });
       fireEvent.click(adminTab);
 
-      // Check default username input has Pateljagrut634@gmail.com
-      const userInput = screen.getByPlaceholderText('Pateljagrut634@gmail.com');
-      const passInput = screen.getByPlaceholderText('Password (Jagrut@634)');
+      // Check default username input has placeholder
+      const userInput = screen.getByPlaceholderText('Enter admin username or email');
+      const passInput = screen.getByPlaceholderText('Enter admin password');
 
       expect(userInput).toBeInTheDocument();
       expect(passInput).toBeInTheDocument();
