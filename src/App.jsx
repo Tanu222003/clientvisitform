@@ -285,7 +285,19 @@ export function getTestFixtureVisits() {
   ];
 }
 
-export const seedKey = "mudita_crm_visits_v1";
+export const seedKey = "ps_crm_visits_v2";
+
+// One-time automatic cleanup of legacy testing/demo cache
+try {
+  if (typeof window !== "undefined" && window.localStorage) {
+    if (!localStorage.getItem("ps_fresh_production_clean_v2")) {
+      localStorage.removeItem("mudita_crm_visits_v1");
+      localStorage.removeItem("mudita_crm_site_visits_v1");
+      localStorage.removeItem("ps_visit_property_cache_v2");
+      localStorage.setItem("ps_fresh_production_clean_v2", "true");
+    }
+  }
+} catch {}
 const API_BASE = import.meta.env.VITE_API_URL || (typeof window !== "undefined" && window.location.port === "5173" ? `http://${window.location.hostname || "localhost"}:5001/api` : "/api");
 const RAILWAY_DIRECT_URL = import.meta.env.VITE_RAILWAY_URL || import.meta.env.VITE_BACKEND_URL || "https://park-solitaire-crm-production.up.railway.app/api";
 
@@ -386,10 +398,9 @@ function useVisits() {
       const fallbackUrl = `${RAILWAY_DIRECT_URL}/visits?_t=${ts}`;
 
       const processJson = (json) => {
-        if (active && json && Array.isArray(json.data) && json.data.length > 0) {
+        if (active && json && Array.isArray(json.data)) {
           setVisits((prev) => {
             const nonDemo = json.data.filter(item => !(typeof item.id === "number" && item.id >= 1 && item.id <= 18));
-            if (nonDemo.length === 0 && prev.length === 0) return prev;
             const normalized = nonDemo.map(item => {
               const existingPrev = prev.find(p => p.id === item.id);
               const prop = resolvePropertyName(item, existingPrev);
@@ -398,8 +409,8 @@ function useVisits() {
                 propertyName: prop
               };
             });
-            const localOnly = prev.filter(p => !normalized.some(n => n.id === p.id));
-            const merged = [...localOnly, ...normalized];
+            const pendingLocal = prev.filter(p => !normalized.some(n => n.id === p.id) && !(typeof p.id === "number" && p.id >= 1 && p.id <= 18));
+            const merged = [...pendingLocal, ...normalized];
             if (JSON.stringify(prev) !== JSON.stringify(merged)) {
               return merged;
             }
@@ -603,7 +614,7 @@ export function getTestFixtureSiteVisits() {
   ];
 }
 
-export const siteVisitsKey = "mudita_crm_site_visits_v1";
+export const siteVisitsKey = "ps_crm_site_visits_v2";
 
 export function useSiteVisits() {
   const [siteVisits, setSiteVisits] = useState(() => {
@@ -629,11 +640,16 @@ export function useSiteVisits() {
       fetch(`${API_BASE}/site-visits`)
         .then(res => res.ok ? res.json() : null)
         .then(json => {
-          if (active && json && Array.isArray(json.data) && json.data.length > 0) {
+          if (active && json && Array.isArray(json.data)) {
             const nonDemo = json.data.filter(sv => !(typeof sv.id === "number" && sv.id >= 1 && sv.id <= 10));
-            if (nonDemo.length > 0) {
-              setSiteVisits(nonDemo);
-            }
+            setSiteVisits((prev) => {
+              const pendingLocal = prev.filter(p => !nonDemo.some(n => n.id === p.id) && !(typeof p.id === "number" && p.id >= 1 && p.id <= 10));
+              const merged = [...pendingLocal, ...nonDemo];
+              if (JSON.stringify(prev) !== JSON.stringify(merged)) {
+                return merged;
+              }
+              return prev;
+            });
           }
         })
         .catch(() => {});
