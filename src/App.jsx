@@ -879,14 +879,6 @@ function LoginScreen({ onLogin }) {
           </form>
         ) : (
           <form onSubmit={handleAdminSubmit} className="login-form-body">
-            <div className="admin-portal-banner">
-              <ShieldCheck size={22} className="admin-banner-icon" />
-              <div>
-                <strong>Central Master Admin Access</strong>
-                <p>Unified management across all properties (Park Solitaire, Veena Developer Pvt LTD, Luxury Empire, Other) in one command center.</p>
-              </div>
-            </div>
-
             <div className="login-form-field">
               <label>Admin Username / Email</label>
               <input
