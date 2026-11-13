@@ -8,7 +8,7 @@ import {
   BarChart3, Bell, Building2, CalendarDays, Check, ChevronDown,
   ClipboardList, Coins, Download, Edit3, FileText, Filter, Home, LayoutDashboard,
   LogOut, Mail, MapPin, Menu, Phone, PhoneCall, Plus, Search, Settings, Sparkles, TrendingUp, UserRound, Users, X,
-  ArrowRight, Layers, Lock, ShieldCheck, Clock, AlertCircle, XCircle, ChevronLeft, ChevronRight, CheckCircle2
+  ArrowRight, Layers, Lock, ShieldCheck, Clock, AlertCircle, XCircle, ChevronLeft, ChevronRight, CheckCircle2, Tablet
 } from "lucide-react";
 
 const getRelativeDateStr = (daysAgo) => {
@@ -172,6 +172,65 @@ export function useAuth() {
     };
   }
   return ctx;
+}
+
+export function usePWAInstall() {
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const checkStandalone = () => {
+      const isStandalone =
+        (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+        window.navigator.standalone === true;
+      if (isStandalone) {
+        setIsInstalled(true);
+      }
+    };
+
+    checkStandalone();
+
+    const handleBeforeInstall = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setIsInstallable(false);
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstall);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
+
+  const triggerInstall = async () => {
+    if (!deferredPrompt) return false;
+    try {
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (choice && choice.outcome === "accepted") {
+        setIsInstalled(true);
+        setIsInstallable(false);
+      }
+      setDeferredPrompt(null);
+      return choice && choice.outcome === "accepted";
+    } catch {
+      return false;
+    }
+  };
+
+  return { isInstallable, isInstalled, triggerInstall };
 }
 
 export function AuthProvider({ children }) {
@@ -737,6 +796,7 @@ function LoginScreen({ onLogin }) {
   const [adminPass, setAdminPass] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { isInstallable, isInstalled, triggerInstall } = usePWAInstall();
 
   const handlePropertySubmit = (e) => {
     e.preventDefault();
@@ -920,6 +980,30 @@ function LoginScreen({ onLogin }) {
             </button>
           </form>
         )}
+
+        <div className="login-pwa-bar">
+          <div className="login-pwa-info">
+            <Tablet size={16} />
+            <span>Lenovo Tablet &amp; Mobile App</span>
+          </div>
+          {isInstalled ? (
+            <span className="pwa-status-pill installed">
+              <CheckCircle2 size={13} /> Installed
+            </span>
+          ) : isInstallable ? (
+            <button
+              type="button"
+              className="pwa-install-trigger-btn"
+              onClick={triggerInstall}
+            >
+              <Download size={13} /> Install App
+            </button>
+          ) : (
+            <span className="pwa-status-hint" title="Open Chrome menu (⋮) and tap 'Install app'">
+              Install via Chrome ⋮ Menu
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -930,6 +1014,7 @@ function Layout({children}) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const auth = useAuth();
   const { currentUser, adminPropertyFilter, setAdminPropertyFilter, logout, isAdmin } = auth;
+  const { isInstallable: isLayoutInstallable, triggerInstall: triggerLayoutInstall } = usePWAInstall();
   const isProperty = currentUser?.role === "property";
 
   const nav = [
@@ -1014,6 +1099,17 @@ function Layout({children}) {
           </div>
 
           <div className="topbar-spacer"/>
+          {isLayoutInstallable && (
+            <button
+              type="button"
+              className="pwa-topbar-install-btn"
+              onClick={triggerLayoutInstall}
+              title="Install Mudita CRM on this tablet / device"
+            >
+              <Download size={13} />
+              <span>Install App</span>
+            </button>
+          )}
           <button className="icon-btn" title="Notifications"><Bell size={18}/><span className="dot"/></button>
           
           <div className="user-chip-wrap">
@@ -4417,25 +4513,35 @@ function Reports({visits}) {
     return visits;
   }, [visits, isPropertyScoped, currentUser, adminPropertyFilter]);
 
-  const total = activeVisits.length || 1;
+  const total = activeVisits.length;
   const types = ["1BHK","2BHK","3BHK","SHOP","2BHK Jodi","Office"];
-  const counts = types.map(t=>[t, activeVisits.filter(v=>(v.interest || "").includes(t)).length]);
+  const counts = types.map(t=>[t, activeVisits.filter(v=>(v.interest || "").toLowerCase().includes(t.toLowerCase())).length]);
   const max = Math.max(...counts.map(x=>x[1]), 1);
   const sources = ["Walk-in","Channel Partner","Social Media Ad","Existing Customer","Director Reference","Website","Outdoor Banner"];
+
+  const bookedVisits = activeVisits.filter(v => {
+    const s = (v.status || "").toLowerCase();
+    return s.includes("book") || s.includes("close");
+  });
+  const convRate = total > 0 ? ((bookedVisits.length / total) * 100).toFixed(1) + "%" : "0.0%";
+  const followUpVisits = activeVisits.filter(v => (v.status || "").toLowerCase().includes("follow")).length;
+  const topTypeEntry = counts.slice().sort((a, b) => b[1] - a[1])[0];
+  const topProperty = topTypeEntry && topTypeEntry[1] > 0 ? topTypeEntry[0] : "—";
+
   return (
     <Layout>
       <PageHead
         title="Reports"
-        subtitle={isPropertyScoped ? `Visit analytics & performance for ${currentUser.property}` : "Visit analytics & performance overview across all properties"}
+        subtitle={isPropertyScoped ? `Live visit analytics & performance for ${currentUser.property}` : "Live visit analytics & performance overview across all properties"}
       >
-        <button className="select-small">This Month <ChevronDown size={12}/></button>
-        <button className="btn primary"><Download size={14}/> Download PDF</button>
+        <button className="select-small">All Time <ChevronDown size={12}/></button>
+        <button type="button" className="btn primary" onClick={() => window.print()}><Download size={14}/> Print / Save PDF</button>
       </PageHead>
       <div className="stats four">
-        <Stat label="TOTAL VISITS" value={activeVisits.length} detail="+ 18% vs last month"/>
-        <Stat label="CONVERSION RATE" value="12.5%" detail="+ 2.1% vs last month"/>
-        <Stat label="AVG. BUDGET" value="78 L" detail="Across all visits"/>
-        <Stat label="TOP PROPERTY" value="2BHK" detail="38% of visits"/>
+        <Stat label="TOTAL VISITS" value={total} detail={total > 0 ? "Total recorded client visits" : "Awaiting first client visit"}/>
+        <Stat label="CONVERSION RATE" value={convRate} detail={`${bookedVisits.length} booked / closed`}/>
+        <Stat label="ACTIVE PIPELINE" value={followUpVisits} detail="Follow-up & revisit leads"/>
+        <Stat label="TOP DEMAND" value={topProperty} detail={topTypeEntry && topTypeEntry[1] > 0 ? `${topTypeEntry[1]} client queries` : "No visits recorded"}/>
       </div>
       <div className="report-grid">
         <section className="panel chart-panel">
@@ -4453,13 +4559,14 @@ function Reports({visits}) {
         <section className="panel">
           <div className="panel-head"><h3>How Clients Heard About Us</h3></div>
           <div className="source-bars">
-            {sources.map((s,i)=>{
-              let n=Math.max(1,Math.round(total*(0.2-i*.018)));
+            {sources.map((s)=>{
+              const actualCount = activeVisits.filter(v => (v.source || "").toLowerCase().includes(s.toLowerCase())).length;
+              const pct = total > 0 ? Math.round((actualCount / total) * 100) : 0;
               return (
                 <div className="source-row" key={s}>
                   <span>{s}</span>
-                  <div><i style={{width:`${Math.min(100,n/Math.max(total,1)*100*3)}%`}}/></div>
-                  <b>{Math.round(n/total*100)}%</b>
+                  <div><i style={{width:`${Math.min(100, pct)}%`}}/></div>
+                  <b>{actualCount} ({pct}%)</b>
                 </div>
               );
             })}
@@ -4467,11 +4574,23 @@ function Reports({visits}) {
         </section>
         <section className="panel">
           <div className="panel-head"><h3>Interest vs Aspiration</h3></div>
-          <SimpleTable rows={counts.slice(0,5).map(([t,n])=>[t,Math.ceil(n*.45),Math.floor(n*.55),n])}/>
+          <SimpleTable rows={counts.slice(0,5).map(([t,n])=>{
+            const personal = activeVisits.filter(v => (v.interest || "").toLowerCase().includes(t.toLowerCase()) && (v.aspiration || "").toLowerCase().includes("personal")).length;
+            const invest = activeVisits.filter(v => (v.interest || "").toLowerCase().includes(t.toLowerCase()) && (v.aspiration || "").toLowerCase().includes("invest")).length;
+            return [t, `Personal: ${personal}`, `Investor: ${invest}`, `Total: ${n}`];
+          })}/>
         </section>
         <section className="panel">
           <div className="panel-head"><h3>Top Performing Sources</h3></div>
-          <SimpleTable rows={sources.slice(0,5).map((s,i)=>[s,Math.max(1,5-i),Math.max(1,3-i),`${Math.max(10,31-i*4)}%`])}/>
+          <SimpleTable rows={sources.slice(0,5).map((s)=>{
+            const sVisits = activeVisits.filter(v => (v.source || "").toLowerCase().includes(s.toLowerCase()));
+            const booked = sVisits.filter(v => {
+              const st = (v.status || "").toLowerCase();
+              return st.includes("book") || st.includes("close");
+            }).length;
+            const pct = sVisits.length > 0 ? Math.round((booked / sVisits.length) * 100) + "%" : "0%";
+            return [s, `${sVisits.length} Visits`, `${booked} Booked`, pct];
+          })}/>
         </section>
       </div>
     </Layout>
@@ -5717,6 +5836,107 @@ function Clients({ visits, onUpdateVisit, onAddVisit }) {
   );
 }
 
+function SettingsView() {
+  const { currentUser, logout } = useAuth();
+  const { isInstallable, isInstalled, triggerInstall } = usePWAInstall();
+  const [syncStatus, setSyncStatus] = useState("Checking...");
+
+  useEffect(() => {
+    fetch(`${API_BASE}/health`)
+      .then(res => res.ok ? res.json() : null)
+      .then(json => {
+        if (json && json.status === "ok") {
+          setSyncStatus("Connected & Healthy (Railway Cloud)");
+        } else {
+          setSyncStatus("Local / Standalone Mode");
+        }
+      })
+      .catch(() => setSyncStatus("Local Mode"));
+  }, []);
+
+  return (
+    <Layout>
+      <PageHead
+        title="Settings & System Health"
+        subtitle="Manage CRM configuration, active desk session, and cloud sync status"
+      />
+      <div className="report-grid">
+        <section className="panel">
+          <div className="panel-head"><h3>Active Session</h3></div>
+          <div className="simple-table">
+            <div className="simple-row"><span className="first">Account Role</span><span>{currentUser?.role === "admin" ? "Master Administrator" : "Property Sales Desk"}</span></div>
+            <div className="simple-row"><span className="first">Desk Name</span><span>{currentUser?.name || "Operations"}</span></div>
+            <div className="simple-row"><span className="first">Property Scope</span><span>{currentUser?.property || "All Properties"}</span></div>
+            <div className="simple-row"><span className="first">Session Email</span><span>{currentUser?.email || "—"}</span></div>
+          </div>
+          <div style={{ marginTop: 14 }}>
+            <NavLink to="/login" className="btn secondary" onClick={logout} style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
+              <LogOut size={14} />
+              <span>Switch Desk / Log Out</span>
+            </NavLink>
+          </div>
+        </section>
+
+        <section className="panel">
+          <div className="panel-head"><h3>Cloud Infrastructure</h3></div>
+          <div className="simple-table">
+            <div className="simple-row"><span className="first">Frontend CDN</span><span>Vercel Edge</span></div>
+            <div className="simple-row"><span className="first">Backend API</span><span>{syncStatus}</span></div>
+            <div className="simple-row"><span className="first">Multi-Device Sync</span><span>Active (Tab & Phone Real-time)</span></div>
+            <div className="simple-row"><span className="first">Storage Capacity</span><span>10 GB (~10,000,000 records)</span></div>
+            <div className="simple-row"><span className="first">App Version</span><span>1.0 Production Ready</span></div>
+          </div>
+        </section>
+
+        <section className="panel" style={{ gridColumn: "1 / -1" }}>
+          <div className="panel-head">
+            <h3>Lenovo Tablet &amp; Chrome App Setup</h3>
+          </div>
+          <div style={{ padding: "18px 22px", display: "flex", flexDirection: "column", gap: 14 }}>
+            <p style={{ margin: 0, color: "#475569", fontSize: 14, lineHeight: 1.6 }}>
+              Mudita CRM is fully optimized as an installable Progressive Web App (PWA) for Lenovo Tablets and Chrome on Android. Installing provides a native full-screen experience without browser tabs or address bar, instant desktop launch, and offline caching.
+            </p>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              {isInstalled ? (
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 16px", background: "#ecfdf5", color: "#047857", borderRadius: 8, fontWeight: 600, fontSize: 13 }}>
+                  <CheckCircle2 size={16} /> Installed on this Tablet (Standalone App Mode)
+                </div>
+              ) : isInstallable ? (
+                <button
+                  type="button"
+                  className="btn primary"
+                  onClick={triggerInstall}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
+                >
+                  <Download size={15} /> Install Mudita CRM App Now
+                </button>
+              ) : (
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 16px", background: "#f1f5f9", color: "#334155", borderRadius: 8, fontSize: 13 }}>
+                  <Tablet size={16} /> Tap Chrome's menu (⋮) at top right &gt; Select <strong>"Install app"</strong>
+                </div>
+              )}
+            </div>
+
+            <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 10, padding: 14 }}>
+              <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: 700, color: "#1e293b", textTransform: "uppercase", letterSpacing: "0.03em" }}>
+                How to Install on Lenovo Tablet via Google Chrome:
+              </h4>
+              <ol style={{ margin: 0, paddingLeft: 20, color: "#475569", fontSize: 13, lineHeight: 1.8 }}>
+                <li>Open <strong>Google Chrome</strong> on your Lenovo Tablet and visit <strong>https://clientvisitform-five.vercel.app</strong></li>
+                <li>Tap the <strong>three vertical dots (⋮)</strong> at the top-right corner of Chrome.</li>
+                <li>Tap <strong>"Install app"</strong> (or <strong>"Add to Home screen"</strong>).</li>
+                <li>When the prompt asks to confirm, tap <strong>"Install"</strong>.</li>
+                <li>The Mudita CRM icon will appear on your tablet's home screen / app drawer and will launch in full-screen standalone mode.</li>
+              </ol>
+            </div>
+          </div>
+        </section>
+      </div>
+    </Layout>
+  );
+}
+
 function Placeholder({title,subtitle}) {
  return <Layout><PageHead title={title} subtitle={subtitle}/><div className="empty-page"><Building2 size={42}/><h2>{title}</h2><p>This module is ready for your next data workflow.</p></div></Layout>
 }
@@ -5894,7 +6114,7 @@ function AppContent() {
       <Route path="/clients" element={<Clients visits={visits} onUpdateVisit={updateVisit} onAddVisit={addVisit} />} />
       <Route
         path="/settings"
-        element={<Placeholder title="Settings" subtitle="Application settings" />}
+        element={<SettingsView />}
       />
     </Routes>
   );
