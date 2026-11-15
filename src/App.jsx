@@ -357,7 +357,8 @@ try {
     }
   }
 } catch {}
-const API_BASE = import.meta.env.VITE_API_URL || (typeof window !== "undefined" && window.location.port === "5173" ? `http://${window.location.hostname || "localhost"}:5001/api` : "/api");
+const isCapacitorApp = typeof window !== "undefined" && (Boolean(window.Capacitor) || window.location.protocol === "capacitor:" || window.location.protocol === "ionic:");
+const API_BASE = import.meta.env.VITE_API_URL || (isCapacitorApp ? "https://clientvisitform-five.vercel.app/api" : (typeof window !== "undefined" && window.location.port === "5173" ? `http://${window.location.hostname || "localhost"}:5001/api` : "/api"));
 const RAILWAY_DIRECT_URL = import.meta.env.VITE_RAILWAY_URL || import.meta.env.VITE_BACKEND_URL || "https://park-solitaire-crm-production.up.railway.app/api";
 
 export function getStoredPropMap() {
@@ -986,23 +987,34 @@ function LoginScreen({ onLogin }) {
             <Tablet size={16} />
             <span>Lenovo Tablet &amp; Mobile App</span>
           </div>
-          {isInstalled ? (
-            <span className="pwa-status-pill installed">
-              <CheckCircle2 size={13} /> Installed
-            </span>
-          ) : isInstallable ? (
-            <button
-              type="button"
-              className="pwa-install-trigger-btn"
-              onClick={triggerInstall}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <a
+              href="/MuditaCRM.apk"
+              download="MuditaCRM.apk"
+              className="pwa-apk-download-btn"
+              title="Download Mudita CRM Android APK file"
             >
-              <Download size={13} /> Install App
-            </button>
-          ) : (
-            <span className="pwa-status-hint" title="Open Chrome menu (⋮) and tap 'Install app'">
-              Install via Chrome ⋮ Menu
-            </span>
-          )}
+              <Download size={13} />
+              <span>Download APK</span>
+            </a>
+            {isInstalled ? (
+              <span className="pwa-status-pill installed">
+                <CheckCircle2 size={13} /> Installed
+              </span>
+            ) : isInstallable ? (
+              <button
+                type="button"
+                className="pwa-install-trigger-btn"
+                onClick={triggerInstall}
+              >
+                <Download size={13} /> Install App
+              </button>
+            ) : (
+              <span className="pwa-status-hint" title="Open Chrome menu (⋮) and tap 'Install app'">
+                Chrome ⋮ Menu
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -5890,45 +5902,69 @@ function SettingsView() {
 
         <section className="panel" style={{ gridColumn: "1 / -1" }}>
           <div className="panel-head">
-            <h3>Lenovo Tablet &amp; Chrome App Setup</h3>
+            <h3>Lenovo Tablet &amp; Android App Downloads</h3>
           </div>
           <div style={{ padding: "18px 22px", display: "flex", flexDirection: "column", gap: 14 }}>
             <p style={{ margin: 0, color: "#475569", fontSize: 14, lineHeight: 1.6 }}>
-              Mudita CRM is fully optimized as an installable Progressive Web App (PWA) for Lenovo Tablets and Chrome on Android. Installing provides a native full-screen experience without browser tabs or address bar, instant desktop launch, and offline caching.
+              Mudita CRM is available as a direct standalone Android APK for your Lenovo Tablets and as an installable Progressive Web App (PWA). Installing gives your desk staff a dedicated full-screen experience with zero browser address bar, instant launcher icons, and automatic cloud sync.
             </p>
 
             <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              <a
+                href="/MuditaCRM.apk"
+                download="MuditaCRM.apk"
+                className="btn primary"
+                style={{ display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none" }}
+              >
+                <Download size={15} /> Download Standalone Android APK (.apk)
+              </a>
+
               {isInstalled ? (
                 <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 16px", background: "#ecfdf5", color: "#047857", borderRadius: 8, fontWeight: 600, fontSize: 13 }}>
-                  <CheckCircle2 size={16} /> Installed on this Tablet (Standalone App Mode)
+                  <CheckCircle2 size={16} /> Web App Installed (Standalone Mode)
                 </div>
               ) : isInstallable ? (
                 <button
                   type="button"
-                  className="btn primary"
+                  className="btn secondary"
                   onClick={triggerInstall}
                   style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
                 >
-                  <Download size={15} /> Install Mudita CRM App Now
+                  <Download size={15} /> Install Web App via Chrome
                 </button>
               ) : (
                 <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 16px", background: "#f1f5f9", color: "#334155", borderRadius: 8, fontSize: 13 }}>
-                  <Tablet size={16} /> Tap Chrome's menu (⋮) at top right &gt; Select <strong>"Install app"</strong>
+                  <Tablet size={16} /> Tap Chrome menu (⋮) &gt; <strong>"Install app"</strong>
                 </div>
               )}
             </div>
 
-            <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 10, padding: 14 }}>
-              <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: 700, color: "#1e293b", textTransform: "uppercase", letterSpacing: "0.03em" }}>
-                How to Install on Lenovo Tablet via Google Chrome:
-              </h4>
-              <ol style={{ margin: 0, paddingLeft: 20, color: "#475569", fontSize: 13, lineHeight: 1.8 }}>
-                <li>Open <strong>Google Chrome</strong> on your Lenovo Tablet and visit <strong>https://clientvisitform-five.vercel.app</strong></li>
-                <li>Tap the <strong>three vertical dots (⋮)</strong> at the top-right corner of Chrome.</li>
-                <li>Tap <strong>"Install app"</strong> (or <strong>"Add to Home screen"</strong>).</li>
-                <li>When the prompt asks to confirm, tap <strong>"Install"</strong>.</li>
-                <li>The Mudita CRM icon will appear on your tablet's home screen / app drawer and will launch in full-screen standalone mode.</li>
-              </ol>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14, marginTop: 4 }}>
+              <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 10, padding: 14 }}>
+                <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: 700, color: "#1e293b", textTransform: "uppercase", letterSpacing: "0.03em" }}>
+                  Option 1: Direct APK Installation (Recommended):
+                </h4>
+                <ol style={{ margin: 0, paddingLeft: 20, color: "#475569", fontSize: 13, lineHeight: 1.8 }}>
+                  <li>Tap the <strong>"Download Standalone Android APK"</strong> button above.</li>
+                  <li>When downloaded, swipe down your notification panel or open <strong>Files / Downloads</strong>.</li>
+                  <li>Tap on <strong>MuditaCRM.apk</strong>.</li>
+                  <li>If prompted, allow <em>"Install unknown apps"</em> for Chrome/Files.</li>
+                  <li>Tap <strong>"Install"</strong> and open the native Mudita CRM app!</li>
+                </ol>
+              </div>
+
+              <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 10, padding: 14 }}>
+                <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: 700, color: "#1e293b", textTransform: "uppercase", letterSpacing: "0.03em" }}>
+                  Option 2: Install via Google Chrome:
+                </h4>
+                <ol style={{ margin: 0, paddingLeft: 20, color: "#475569", fontSize: 13, lineHeight: 1.8 }}>
+                  <li>Open <strong>Google Chrome</strong> on your Lenovo Tablet and visit this site.</li>
+                  <li>Tap the <strong>three vertical dots (⋮)</strong> at the top-right corner of Chrome.</li>
+                  <li>Tap <strong>"Install app"</strong> (or <strong>"Add to Home screen"</strong>).</li>
+                  <li>Tap <strong>"Install"</strong> in the popup window.</li>
+                  <li>The app will be installed on your tablet home screen.</li>
+                </ol>
+              </div>
             </div>
           </div>
         </section>
